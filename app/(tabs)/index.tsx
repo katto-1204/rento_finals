@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import { auth } from "../../config/firebase"
+import type { Car } from "../../types/car"
 
 const { width } = Dimensions.get("window")
 
@@ -24,61 +25,105 @@ const coupons = [
   },
 ]
 
-const featuredCars = [
+// Update featuredCars type
+const featuredCars: Car[] = [
   {
-    id: 1,
+    id: "1", // Change to string to match Car interface
     name: "BMW X5",
     brand: "BMW",
-    price: "$120/day",
+    pricePerDay: 120, // Change price to number
     location: "Davao City",
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qk1XIFg1PC90ZXh0Pgo8L3N2Zz4K",
+    // Add other required Car properties
+    model: "X5",
+    year: 2023,
+    seats: 5,
+    rating: 4.8,
+    availability: true,
+    type: "SUV",
+    createdAt: new Date(),
   },
   {
-    id: 2,
+    id: "2",
     name: "Mercedes C-Class",
     brand: "Mercedes",
-    price: "$100/day",
+    pricePerDay: 100,
     location: "Davao City",
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+TWVyY2VkZXM8L3RleHQ+Cjwvc3ZnPgo=",
+    model: "C-Class",
+    year: 2023,
+    seats: 5,
+    rating: 4.7,
+    availability: true,
+    type: "Sedan",
+    createdAt: new Date(),
   },
   {
-    id: 3,
+    id: "3",
     name: "Audi A4",
     brand: "Audi",
-    price: "$90/day",
+    pricePerDay: 90,
     location: "Davao City",
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+QXVkaSBBNDwvdGV4dD4KPC9zdmc+Cg==",
+    model: "A4",
+    year: 2023,
+    seats: 5,
+    rating: 4.6,
+    availability: true,
+    type: "Sedan",
+    createdAt: new Date(),
   },
 ]
 
-const recentlyRented = [
+const recentlyRented: Car[] = [
   {
-    id: 1,
+    id: "1",
     name: "Toyota Camry",
     brand: "Toyota",
-    price: "$80/day",
+    model: "Camry",
+    year: 2023,
+    pricePerDay: 80,
     location: "Davao City",
+    seats: 5,
+    rating: 4.5,
+    availability: true,
+    type: "Sedan",
+    createdAt: new Date(),
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNjY2NjY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+VG95b3RhPC90ZXh0Pgo8L3N2Zz4K",
   },
   {
-    id: 2,
+    id: "2",
     name: "Honda Civic",
     brand: "Honda",
-    price: "$70/day",
+    model: "Civic",
+    year: 2023,
+    pricePerDay: 70,
     location: "Davao City",
+    seats: 5,
+    rating: 4.3,
+    availability: true,
+    type: "Sedan",
+    createdAt: new Date(),
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjOTk5OTk5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+SG9uZGE8L3RleHQ+Cjwvc3ZnPgo=",
   },
   {
-    id: 3,
+    id: "3",
     name: "Nissan Altima",
     brand: "Nissan",
-    price: "$75/day",
+    model: "Altima",
+    year: 2023,
+    pricePerDay: 75,
     location: "Davao City",
+    seats: 5,
+    rating: 4.4,
+    availability: true,
+    type: "Sedan",
+    createdAt: new Date(),
     image:
       "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjY2NjY2NjIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9ImJsYWNrIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Tmlzc2FuPC90ZXh0Pgo8L3N2Zz4K",
   },
@@ -94,12 +139,19 @@ export default function HomeScreen() {
     }
   }, [])
 
-  const renderCarCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.carCard} onPress={() => router.push("/car-details")}>
+  const renderCarCard = ({ item }: { item: Car }) => (
+    <TouchableOpacity
+      style={styles.carCard}
+      onPress={() => router.push({
+        pathname: "/car-details/[id]",
+        params: { id: item.id }
+      })}
+      activeOpacity={0.7}
+    >
       <Image source={{ uri: item.image }} style={styles.carImage} />
       <View style={styles.carInfo}>
         <Text style={styles.carName}>{item.name}</Text>
-        <Text style={styles.carPrice}>{item.price}</Text>
+        <Text style={styles.carPrice}>{item.pricePerDay}</Text>
         <View style={styles.carLocation}>
           <Text style={styles.carBrand}>{item.brand}</Text>
           <Text style={styles.locationText}>{item.location}</Text>
@@ -192,7 +244,7 @@ export default function HomeScreen() {
           <FlatList
             data={featuredCars}
             renderItem={renderCarCard}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
           />
         </View>
@@ -210,13 +262,20 @@ export default function HomeScreen() {
             horizontal
             showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.horizontalCarCard}>
+              <TouchableOpacity
+                style={styles.horizontalCarCard}
+                onPress={() => router.push({
+                  pathname: "/car-details/[id]",
+                  params: { id: item.id }
+                })}
+                activeOpacity={0.7}
+              >
                 <Image source={{ uri: item.image }} style={styles.horizontalCarImage} />
                 <Text style={styles.horizontalCarName}>{item.name}</Text>
-                <Text style={styles.horizontalCarPrice}>{item.price}</Text>
+                <Text style={styles.horizontalCarPrice}>${item.pricePerDay}/day</Text>
               </TouchableOpacity>
             )}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.id}
           />
         </View>
       </ScrollView>

@@ -145,7 +145,14 @@ export default function SearchScreen() {
   )
 
   const renderCarItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.carCard} onPress={() => router.push("/car-details")}>
+    <TouchableOpacity 
+      style={styles.carCard} 
+      onPress={() => router.push({
+        pathname: "/car-details/[id]",
+        params: { id: item.id }
+      })}
+      activeOpacity={0.7}
+    >
       <Image source={{ uri: item.image }} style={styles.carImage} />
       <View style={styles.carInfo}>
         <Text style={styles.carName}>{item.name}</Text>
