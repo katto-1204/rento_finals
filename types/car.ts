@@ -17,10 +17,14 @@ export interface Car {
 export interface CarFilter {
   brand?: string;
   type?: string;
-  location?: string;
   priceRange?: {
     min: number;
     max: number;
   };
+  location?: string;
   seats?: number;
+  availability?: boolean;
+  rating?: number;
+  sortBy?: 'price' | 'rating' | 'createdAt';
+  order?: 'asc' | 'desc';
 }
