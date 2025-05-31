@@ -50,6 +50,13 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <TouchableOpacity 
+        style={styles.adminButton}
+        onPress={() => router.push("/admin")}
+      >
+        <Text style={styles.adminButtonText}>ADMIN</Text>
+      </TouchableOpacity>
+
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
@@ -194,5 +201,20 @@ const styles = StyleSheet.create({
     color: "#4169e1",
     fontSize: 16,
     fontWeight: "600",
+  },
+  adminButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    backgroundColor: '#FFB700',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    zIndex: 1,
+  },
+  adminButtonText: {
+    color: '#000000',
+    fontSize: 14,
+    fontWeight: '600',
   },
 })
