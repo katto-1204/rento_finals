@@ -1,35 +1,34 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
+import { collection, addDoc, onSnapshot } from "firebase/firestore"
+import { db } from "../config/firebase"
+
+interface Car {
+  id: string
+  name: string
+  brand: string
+  pricePerDay: number
+  type: string
+  fuel: string
+  seats: number
+  image: string
+  createdAt: Date
+  status: string
+  bookings: number
+  rating: number
+  availability: boolean
+}
 
 const adminTabs = [
   { id: "cars", name: "Manage Cars", icon: "car" },
   { id: "bookings", name: "Bookings", icon: "calendar" },
   { id: "users", name: "Users", icon: "people" },
   { id: "reports", name: "Reports", icon: "analytics" },
-]
-
-const mockCars = [
-  {
-    id: 1,
-    name: "BMW X5",
-    brand: "BMW",
-    price: 120,
-    status: "Available",
-    bookings: 15,
-  },
-  {
-    id: 2,
-    name: "Mercedes C-Class",
-    brand: "Mercedes",
-    price: 100,
-    status: "Rented",
-    bookings: 12,
-  },
 ]
 
 export default function AdminScreen() {
@@ -44,30 +43,80 @@ export default function AdminScreen() {
     seats: "",
     carImage: "",
   })
+  const [cars, setCars] = useState<Car[]>([]) // Update this line
 
-  const handleAddCar = () => {
+  useEffect(() => {
+    const fetchCars = async () => {
+      const carsRef = collection(db, "cars")
+      const unsubscribe = onSnapshot(carsRef, (snapshot) => {
+        const carsData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          name: doc.data().name,
+          brand: doc.data().brand,
+          pricePerDay: doc.data().pricePerDay,
+          type: doc.data().type,
+          fuel: doc.data().fuel,
+          seats: doc.data().seats,
+          image: doc.data().image,
+          createdAt: doc.data().createdAt,
+          status: doc.data().status,
+          bookings: doc.data().bookings,
+          rating: doc.data().rating,
+          availability: doc.data().availability
+        })) as Car[]
+        setCars(carsData)
+      })
+
+      return () => unsubscribe()
+    }
+
+    fetchCars()
+  }, [])
+
+  const handleAddCar = async () => {
     if (!newCar.name || !newCar.brand || !newCar.price) {
       Alert.alert("Error", "Please fill in all required fields")
       return
     }
 
-    Alert.alert("Success", "Car added successfully!", [
-      {
-        text: "OK",
-        onPress: () => {
-          setShowAddCarForm(false)
-          setNewCar({
-            name: "",
-            brand: "",
-            price: "",
-            type: "",
-            fuel: "",
-            seats: "",
-            carImage: "",
-          })
+    try {
+      const carData = {
+        name: newCar.name,
+        brand: newCar.brand,
+        pricePerDay: Number(newCar.price),
+        type: newCar.type || "",
+        fuel: newCar.fuel || "",
+        seats: Number(newCar.seats) || 0,
+        image: newCar.carImage || "",
+        createdAt: new Date(),
+        status: "Available",
+        bookings: 0,
+        rating: 0,
+        availability: true,
+      }
+
+      await addDoc(collection(db, "cars"), carData)
+
+      Alert.alert("Success", "Car added successfully!", [
+        {
+          text: "OK",
+          onPress: () => {
+            setShowAddCarForm(false)
+            setNewCar({
+              name: "",
+              brand: "",
+              price: "",
+              type: "",
+              fuel: "",
+              seats: "",
+              carImage: "",
+            })
+          },
         },
-      },
-    ])
+      ])
+    } catch (error: any) {
+      Alert.alert("Error", "Failed to add car: " + error.message)
+    }
   }
 
   const renderCarsTab = () => (
@@ -170,12 +219,12 @@ export default function AdminScreen() {
       )}
 
       <View style={styles.carsList}>
-        {mockCars.map((car) => (
+        {cars.map((car) => (
           <View key={car.id} style={styles.carCard}>
             <View style={styles.carInfo}>
               <Text style={styles.carName}>{car.name}</Text>
               <Text style={styles.carBrand}>{car.brand}</Text>
-              <Text style={styles.carPrice}>${car.price}/day</Text>
+              <Text style={styles.carPrice}>${car.pricePerDay}/day</Text>
               <View style={styles.carStats}>
                 <Text style={styles.carStat}>Status: {car.status}</Text>
                 <Text style={styles.carStat}>Bookings: {car.bookings}</Text>
