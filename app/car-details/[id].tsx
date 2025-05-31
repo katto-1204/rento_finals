@@ -5,10 +5,11 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router, useLocalSearchParams } from "expo-router"
+import { cars } from "../../data/cars"
 
 const { width } = Dimensions.get("window")
 
-// Define car specs array
+
 const carSpecs = [
   { icon: "speedometer", label: "Mileage", value: "25,000 km" },
   { icon: "car", label: "Fuel Type", value: "Gasoline" },
@@ -18,77 +19,9 @@ const carSpecs = [
   { icon: "shield-checkmark", label: "Insurance", value: "Included" },
 ]
 
-// Type for the cars data
-type CarsData = {
-  [key: string]: {
-    id: string
-    name: string
-    brand: string
-    model: string
-    year: number
-    pricePerDay: number
-    location: string
-    seats: number
-    rating: number
-    availability: boolean
-    type: string
-    createdAt: Date
-    image: string
-  }
-}
-
-// Local car data
-const carsData: CarsData = {
-  "1": {
-    id: "1",
-    name: "BMW X5",
-    brand: "BMW",
-    model: "X5",
-    year: 2023,
-    pricePerDay: 120,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.8,
-    availability: true,
-    type: "SUV",
-    createdAt: new Date(),
-    image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qk1XIFg1PC90ZXh0Pgo8L3N2Zz4K",
-  },
-  "2": {
-    id: "2",
-    name: "Mercedes C-Class",
-    brand: "Mercedes",
-    model: "C-Class",
-    year: 2023,
-    pricePerDay: 100,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.7,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-    image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+TWVyY2VkZXM8L3RleHQ+Cjwvc3ZnPgo=",
-  },
-  "3": {
-    id: "3",
-    name: "Audi A4",
-    brand: "Audi",
-    model: "A4",
-    year: 2023,
-    pricePerDay: 90,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.6,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-    image: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+QXVkaSBBNDwvdGV4dD4KPC9zdmc+Cg==",
-  }
-}
-
 export default function CarDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
-  const car = carsData[id]
+  const car = cars.find(car => car.id === id)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   if (!car) {

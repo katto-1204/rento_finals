@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { router } from "expo-router"
@@ -26,26 +27,35 @@ export default function RegisterScreen() {
     confirmPassword: "",
   })
   const [loading, setLoading] = useState(false)
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalTitle, setModalTitle] = useState("")
+  const [modalMessage, setModalMessage] = useState("")
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const showModal = (title: string, message: string) => {
+    setModalTitle(title)
+    setModalMessage(message)
+    setModalVisible(true)
   }
 
   const handleRegister = async () => {
     const { fullName, email, password, confirmPassword } = formData
 
     if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert("Error", "Please fill in all fields")
+      showModal("Error", "Please fill in all fields")
       return
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match")
+      showModal("Error", "Passwords do not match")
       return
     }
 
     if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters")
+      showModal("Error", "Password must be at least 6 characters")
       return
     }
 
@@ -99,7 +109,7 @@ export default function RegisterScreen() {
       } else if (error.code === "unavailable") {
         errorMessage = "Firestore unavailable: Check network connection"
       }
-      Alert.alert("Registration Failed", errorMessage)
+      showModal("Registration Failed", errorMessage)
     } finally {
       setLoading(false)
     }
@@ -107,6 +117,26 @@ export default function RegisterScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{modalTitle}</Text>
+            <Text style={styles.modalMessage}>{modalMessage}</Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.keyboardView}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.header}>
@@ -259,6 +289,47 @@ const styles = StyleSheet.create({
   },
   loginLink: {
     color: "#4169e1",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalContent: {
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    padding: 24,
+    width: "100%",
+    maxWidth: 340,
+    alignItems: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000000",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: "#666666",
+    marginBottom: 24,
+    textAlign: "center",
+  },
+  modalButton: {
+    backgroundColor: "#4169e1",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    minWidth: 120,
+    alignItems: "center",
+  },
+  modalButtonText: {
+    color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
   },

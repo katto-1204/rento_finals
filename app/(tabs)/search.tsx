@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
+import { cars } from "../../data/cars"
 
 const { width } = Dimensions.get("window")
 
@@ -29,108 +30,18 @@ const brands = [
   { id: 8, name: "Hyundai", logo: "🚙" },
 ]
 
-const allCars = [
-  // BMW Cars
-  {
-    id: 1,
-    name: "BMW X5",
-    brand: "BMW",
-    price: "$120/day",
-    location: "Davao City",
-    type: "SUV",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qk1XIFg1PC90ZXh0Pgo8L3N2Zz4K",
-  },
-  {
-    id: 2,
-    name: "BMW 3 Series",
-    brand: "BMW",
-    price: "$100/day",
-    location: "Davao City",
-    type: "Sedan",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxMiI+Qk1XIDMgU2VyaWVzPC90ZXh0Pgo8L3N2Zz4K",
-  },
-  {
-    id: 3,
-    name: "BMW X3",
-    brand: "BMW",
-    price: "$110/day",
-    location: "Davao City",
-    type: "SUV",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qk1XIFgzPC90ZXh0Pgo8L3N2Zz4K",
-  },
-  // Mercedes Cars
-  {
-    id: 4,
-    name: "Mercedes C-Class",
-    brand: "Mercedes",
-    price: "$100/day",
-    location: "Davao City",
-    type: "Sedan",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxMiI+TWVyY2VkZXMgQy1DbGFzczwvdGV4dD4KPC9zdmc+Cg==",
-  },
-  {
-    id: 5,
-    name: "Mercedes GLE",
-    brand: "Mercedes",
-    price: "$130/day",
-    location: "Davao City",
-    type: "SUV",
-    fuel: "Gasoline",
-    seats: 7,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxMiI+TWVyY2VkZXMgR0xFPC90ZXh0Pgo8L3N2Zz4K",
-  },
-  {
-    id: 6,
-    name: "Mercedes E-Class",
-    brand: "Mercedes",
-    price: "$115/day",
-    location: "Davao City",
-    type: "Sedan",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxMiI+TWVyY2VkZXMgRS1DbGFzczwvdGV4dD4KPC9zdmc+Cg==",
-  },
-  // Continue with other brands...
-  {
-    id: 7,
-    name: "Audi A4",
-    brand: "Audi",
-    price: "$90/day",
-    location: "Davao City",
-    type: "Sedan",
-    fuel: "Gasoline",
-    seats: 5,
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+QXVkaSBBNDwvdGV4dD4KPC9zdmc+Cg==",
-  },
-]
-
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
-  const [filteredCars, setFilteredCars] = useState(allCars)
+  const [filteredCars, setFilteredCars] = useState(cars)
 
   const handleBrandSelect = (brandName: string) => {
     if (selectedBrand === brandName) {
       setSelectedBrand(null)
-      setFilteredCars(allCars)
+      setFilteredCars(cars)
     } else {
       setSelectedBrand(brandName)
-      setFilteredCars(allCars.filter((car) => car.brand === brandName))
+      setFilteredCars(cars.filter((car) => car.brand === brandName))
     }
   }
 

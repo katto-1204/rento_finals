@@ -7,6 +7,9 @@ import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import { auth } from "../../config/firebase"
 import type { Car } from "../../types/car"
+import DateTimePicker from '@react-native-community/datetimepicker'
+import { Platform } from 'react-native'
+
 
 const { width } = Dimensions.get("window")
 
@@ -16,12 +19,14 @@ const coupons = [
     title: "FIRST20",
     description: "20% off your first rental",
     color: "#4169e1",
+    image: require('../../assets/coup1.png')
   },
   {
     id: 2,
     title: "WEEKEND50",
     description: "50% off weekend rentals",
     color: "#c2a300",
+    image: require('../../assets/coup2.png')
   },
 ]
 
@@ -132,10 +137,31 @@ const recentlyRented: Car[] = [
 export default function HomeScreen() {
   const [currentCouponIndex, setCurrentCouponIndex] = useState(0)
   const [userName, setUserName] = useState("User")
+  const [isRental, setIsRental] = useState(true)
+  const [showPicker, setShowPicker] = useState(false)
+  const [pickerMode, setPickerMode] = useState<'date' | 'time'>('date')
+  const [activeField, setActiveField] = useState<'pickUp' | 'dropOff' | null>(null)
+  const [formData, setFormData] = useState({
+    pickUpDate: new Date(),
+    pickUpTime: new Date(),
+    pickUpLocation: '',
+    dropOffDate: new Date(),
+    dropOffTime: new Date(),
+    dropOffLocation: '',
+    // Airport specific fields
+    flightNumber: '',
+    airline: '',
+    terminal: '',
+  })
 
   useEffect(() => {
     if (auth.currentUser?.displayName) {
       setUserName(auth.currentUser.displayName.split(" ")[0])
+    } else if (auth.currentUser?.email) {
+      // Extract name from email (everything before @)
+      const emailName = auth.currentUser.email.split("@")[0]
+      // Capitalize first letter
+      setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1))
     }
   }, [])
 
@@ -160,6 +186,22 @@ export default function HomeScreen() {
       <Ionicons name="chevron-forward" size={20} color="#4169e1" />
     </TouchableOpacity>
   )
+
+  const showDateTimePicker = (mode: 'date' | 'time', field: 'pickUp' | 'dropOff') => {
+    setPickerMode(mode)
+    setActiveField(field)
+    setShowPicker(true)
+  }
+
+  const onDateTimeChange = (event: any, selectedValue: Date | undefined) => {
+    setShowPicker(Platform.OS === 'ios')
+    if (selectedValue && activeField) {
+      setFormData(prev => ({
+        ...prev,
+        [`${activeField}${pickerMode === 'date' ? 'Date' : 'Time'}`]: selectedValue
+      }))
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -191,9 +233,12 @@ export default function HomeScreen() {
               setCurrentCouponIndex(index)
             }}
             renderItem={({ item }) => (
-              <View style={[styles.couponCard, { backgroundColor: item.color }]}>
-                <Text style={styles.couponTitle}>{item.title}</Text>
-                <Text style={styles.couponDescription}>{item.description}</Text>
+              <View style={[styles.couponCard, { backgroundColor: 'transparent' }]}>
+                <Image 
+                  source={item.image} 
+                  style={styles.couponImage}
+                  resizeMode="cover"
+                />
               </View>
             )}
             keyExtractor={(item) => item.id.toString()}
@@ -214,28 +259,114 @@ export default function HomeScreen() {
         {/* Rental Form */}
         <View style={styles.rentalForm}>
           <View style={styles.rentalTabs}>
-            <TouchableOpacity style={[styles.rentalTab, styles.activeTab]}>
-              <Text style={styles.activeTabText}>RENTAL</Text>
+            <TouchableOpacity 
+              style={[
+                styles.rentalTab, 
+                isRental && styles.activeRentalTab
+              ]}
+              onPress={() => setIsRental(true)}
+            >
+              <Text style={[styles.tabText, isRental && styles.activeRentalText]}>RENTAL</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.rentalTab}>
-              <Text style={styles.tabText}>AIRPORT PICKUP</Text>
+            <TouchableOpacity 
+              style={[
+                styles.rentalTab, 
+                !isRental && styles.activeAirportTab
+              ]}
+              onPress={() => setIsRental(false)}
+            >
+              <Text style={[styles.tabText, !isRental && styles.activeAirportText]}>AIRPORT PICKUP</Text>
             </TouchableOpacity>
           </View>
 
-          <View style={styles.dateTimeContainer}>
-            <TouchableOpacity style={styles.dateTimeInput}>
-              <Ionicons name="calendar" size={20} color="#4169e1" />
-              <Text style={styles.dateTimeText}>Pick-up Date & Time</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.dateTimeInput}>
-              <Ionicons name="calendar" size={20} color="#4169e1" />
-              <Text style={styles.dateTimeText}>Drop-off Date & Time</Text>
-            </TouchableOpacity>
-          </View>
+          {isRental ? (
+            <View style={styles.formContainer}>
+              <View style={styles.dateLocationContainer}>
+                <TouchableOpacity 
+                  style={styles.dateTimeInput}
+                  onPress={() => showDateTimePicker('date', 'pickUp')}
+                >
+                  <Ionicons name="calendar" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>
+                    {formData.pickUpDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.dateTimeInput}
+                  onPress={() => showDateTimePicker('time', 'pickUp')}
+                >
+                  <Ionicons name="time" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>
+                    {formData.pickUpTime.toLocaleTimeString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.locationInput}>
+                  <Ionicons name="location" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>Pick-up Location</Text>
+                </TouchableOpacity>
+              </View>
 
-          <TouchableOpacity style={styles.findCarsButton} onPress={() => router.push("/(tabs)/search")}>
+              <View style={styles.dateLocationContainer}>
+                <TouchableOpacity 
+                  style={styles.dateTimeInput}
+                  onPress={() => showDateTimePicker('date', 'dropOff')}
+                >
+                  <Ionicons name="calendar" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>
+                    {formData.dropOffDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  style={styles.dateTimeInput}
+                  onPress={() => showDateTimePicker('time', 'dropOff')}
+                >
+                  <Ionicons name="time" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>
+                    {formData.dropOffTime.toLocaleTimeString()}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.locationInput}>
+                  <Ionicons name="location" size={20} color="#4169e1" />
+                  <Text style={styles.dateTimeText}>Drop-off Location</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <View style={styles.formContainer}>
+              <TouchableOpacity style={styles.airportInput}>
+                <Ionicons name="airplane" size={20} color="#c2a300" />
+                <Text style={styles.dateTimeText}>Flight Number</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.airportInput}>
+                <Ionicons name="business" size={20} color="#c2a300" />
+                <Text style={styles.dateTimeText}>Airline</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.airportInput}>
+                <Ionicons name="terminal" size={20} color="#c2a300" />
+                <Text style={styles.dateTimeText}>Terminal</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          <TouchableOpacity 
+            style={[styles.findCarsButton, { backgroundColor: isRental ? '#4169e1' : '#c2a300' }]} 
+            onPress={() => router.push("/(tabs)/search")}
+          >
             <Text style={styles.findCarsButtonText}>Find Cars</Text>
           </TouchableOpacity>
+
+          {showPicker && (
+            <DateTimePicker
+              value={activeField === 'pickUp' ? 
+                (pickerMode === 'date' ? formData.pickUpDate : formData.pickUpTime) :
+                (pickerMode === 'date' ? formData.dropOffDate : formData.dropOffTime)
+              }
+              mode={pickerMode}
+              is24Hour={true}
+              display="default"
+              onChange={onDateTimeChange}
+            />
+          )}
         </View>
 
         {/* Featured Cars */}
@@ -330,12 +461,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginVertical: 20,
   },
+  couponImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
+  },
   couponCard: {
     width: width - 40,
     height: 120,
     borderRadius: 12,
-    padding: 20,
-    justifyContent: "center",
+    overflow: 'hidden',
     marginRight: 10,
   },
   couponTitle: {
@@ -385,49 +520,60 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 12,
     alignItems: "center",
-    borderRadius: 6,
+    borderRadius: 25,
+    margin: 4,
   },
-  activeTab: {
+  activeRentalTab: {
     backgroundColor: "#4169e1",
   },
-  activeTabText: {
+  activeAirportTab: {
+    backgroundColor: "#c2a300",
+  },
+  activeRentalText: {
     color: "#ffffff",
-    fontWeight: "600",
-    fontSize: 14,
   },
-  tabText: {
-    color: "#666666",
-    fontWeight: "600",
-    fontSize: 14,
+  activeAirportText: {
+    color: "#ffffff",
   },
-  dateTimeContainer: {
+  formContainer: {
     gap: 15,
-    marginBottom: 20,
+    marginVertical: 20,
+  },
+  dateLocationContainer: {
+    gap: 10,
   },
   dateTimeInput: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#ffffff",
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 25,
     borderWidth: 1,
     borderColor: "#e0e0e0",
   },
-  dateTimeText: {
-    marginLeft: 12,
-    fontSize: 16,
-    color: "#666666",
+  locationInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  airportInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
   },
   findCarsButton: {
-    backgroundColor: "#c2a300",
     paddingVertical: 16,
-    borderRadius: 8,
+    borderRadius: 25,
     alignItems: "center",
-  },
-  findCarsButtonText: {
-    color: "#ffffff",
-    fontSize: 18,
-    fontWeight: "600",
+    marginTop: 10,
   },
   section: {
     paddingHorizontal: 20,
@@ -530,5 +676,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     color: "#4169e1",
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#666666",
+  },
+  dateTimeText: {
+    fontSize: 14,
+    color: "#666666",
+    marginLeft: 10,
+    flex: 1,
+  },
+  findCarsButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 })

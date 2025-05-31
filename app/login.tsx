@@ -26,10 +26,15 @@ export default function LoginScreen() {
   const [adminModalVisible, setAdminModalVisible] = useState(false)
   const [adminPassword, setAdminPassword] = useState("")
   const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorModalVisible, setErrorModalVisible] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [errorTitle, setErrorTitle] = useState("")
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please fill in all fields")
+      setErrorTitle("Error")
+      setErrorMessage("Please fill in all fields")
+      setErrorModalVisible(true)
       return
     }
 
@@ -39,14 +44,18 @@ export default function LoginScreen() {
       const userDoc = await getDoc(doc(db, "users", userCredential.user.uid))
 
       if (!userDoc.exists()) {
-        Alert.alert("Error", "User data not found in Firestore")
+        setErrorTitle("Error")
+        setErrorMessage("User data not found in Firestore")
+        setErrorModalVisible(true)
         return
       }
 
       router.replace("/(tabs)")
     } catch (error: any) {
       console.error("Login error:", error.code, error.message)
-      Alert.alert("Login Failed", error.message)
+      setErrorTitle("Login Failed")
+      setErrorMessage(error.message)
+      setErrorModalVisible(true)
     } finally {
       setLoading(false)
     }
@@ -128,6 +137,32 @@ export default function LoginScreen() {
             </TouchableOpacity>
             <Text style={styles.errorTitle}>Access Denied</Text>
             <Text style={styles.errorMessage}>Whoops! Admin access only.</Text>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={errorModalVisible}
+        onRequestClose={() => setErrorModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, styles.errorModalContent]}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+            <Text style={styles.errorTitle}>{errorTitle}</Text>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+            <TouchableOpacity 
+              style={[styles.modalButton, { marginTop: 20 }]}
+              onPress={() => setErrorModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -350,8 +385,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   errorModalContent: {
-    position: 'relative',
-    paddingTop: 40, // Make room for close button
+    backgroundColor: '#ffffff',
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+    maxWidth: '80%',
   },
   closeButton: {
     position: 'absolute',
@@ -368,7 +406,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   errorTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#FF3B30',
     marginBottom: 12,
@@ -378,5 +416,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666666',
     textAlign: 'center',
+    marginBottom: 8,
   },
 })

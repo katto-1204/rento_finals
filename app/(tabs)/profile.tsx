@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
@@ -62,43 +62,22 @@ export default function ProfileScreen() {
     totalRentals: 12,
   })
 
-  const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Logout",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            await signOut(auth)
-            // Replace with login screen
-            router.replace("/login")
-          } catch (error) {
-            Alert.alert("Error", "Failed to logout")
-          }
-        },
-      },
-    ])
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false)
+
+  const handleLogout = async () => {
+    setLogoutModalVisible(true)
   }
 
-  const handleDeleteAccount = () => {
-    Alert.alert("Delete Account", "Are you sure you want to delete your account? This action cannot be undone.", [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => {
-          Alert.alert("Account Deleted", "Your account has been deleted successfully.")
-        },
-      },
-    ])
+  const confirmLogout = async () => {
+    try {
+      await signOut(auth)
+      setLogoutModalVisible(false)
+      router.replace("/login")
+    } catch (error) {
+      console.error("Logout error:", error)
+    }
   }
+
 
   const renderMenuItem = (item: any) => (
     <TouchableOpacity key={item.id} style={styles.menuItem} onPress={() => router.push(item.route)}>
@@ -166,12 +145,37 @@ export default function ProfileScreen() {
             <Text style={styles.logoutButtonText}>Logout</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
-            <Ionicons name="trash-outline" size={24} color="#ff4444" />
-            <Text style={styles.deleteButtonText}>Delete Account</Text>
-          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={logoutModalVisible}
+        onRequestClose={() => setLogoutModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Logout</Text>
+            <Text style={styles.modalMessage}>Are you sure to log out?</Text>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={() => setLogoutModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.confirmButton]} 
+                onPress={confirmLogout}
+              >
+                <Text style={styles.confirmButtonText}>OK</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -327,7 +331,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#4169e1",
+    backgroundColor: "red",
     paddingVertical: 16,
     borderRadius: 12,
     gap: 12,
@@ -352,5 +356,59 @@ const styles = StyleSheet.create({
     color: "#ff4444",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '100%',
+    maxWidth: 340,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    marginBottom: 12,
+  },
+  modalMessage: {
+    fontSize: 16,
+    color: '#666666',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f0f0f0',
+  },
+  confirmButton: {
+    backgroundColor: '#4169e1',
+  },
+  cancelButtonText: {
+    color: '#666666',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  confirmButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 })

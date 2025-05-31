@@ -115,7 +115,7 @@ export default function OTPScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1054CF", // Changed to blue background
   },
   content: {
     flex: 1,
@@ -129,17 +129,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#ffffff", // Changed to white
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666666",
+    color: "#ffffff", // Changed to white
     textAlign: "center",
+    opacity: 0.8,
   },
   otpContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center", // Changed to center
+    gap: 12, // Added gap between inputs
     marginBottom: 40,
     paddingHorizontal: 20,
   },
@@ -147,19 +149,20 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderWidth: 2,
-    borderColor: "#e0e0e0",
+    borderColor: "#FFB700", // Changed to yellow
     borderRadius: 12,
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000000",
-    backgroundColor: "#f8f9fa",
+    color: "#FFB700", // Changed to yellow
+    backgroundColor: "rgba(255, 255, 255, 0.1)", // Translucent white
+    textAlign: "center", // Ensure number is centered
   },
   otpInputFilled: {
-    borderColor: "#4169e1",
-    backgroundColor: "#ffffff",
+    borderColor: "#FFB700", // Changed to yellow
+    backgroundColor: "rgba(255, 255, 255, 0.2)", // More visible when filled
   },
   verifyButton: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#FFB700", // Changed to yellow
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -169,7 +172,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   verifyButtonText: {
-    color: "#ffffff",
+    color: "#ffffff", // Changed to white
     fontSize: 18,
     fontWeight: "600",
   },
@@ -179,11 +182,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   resendText: {
-    color: "#666666",
+    color: "#ffffff", // Changed to white
     fontSize: 16,
+    opacity: 0.8,
   },
   resendLink: {
-    color: "#4169e1",
+    color: "#FFB700", // Changed to yellow
     fontSize: 16,
     fontWeight: "600",
   },
