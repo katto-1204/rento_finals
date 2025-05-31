@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app"
 import { getAuth } from "firebase/auth"
-import { getFirestore } from "firebase/firestore"
+import { getFirestore, collection, addDoc, deleteDoc, doc } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: "AIzaSyDEEZskDHI4NvBKnmrO58IbnGLSSnUEYKw",
@@ -11,8 +11,28 @@ const firebaseConfig = {
   appId: "1:730119150751:web:41dc6974d405005ac016aa"
 };
 
-// Initialize Firebase only if no apps exist
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp()
+// Initialize Firebase with error handling
+let app;
+try {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  console.error("Firebase initialization error:", error);
+  app = initializeApp(firebaseConfig);
+}
 
-export const auth = getAuth(app)
-export const db = getFirestore(app)
+// Keep both auth and firestore exports
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Add connection test helper
+export const testFirestoreConnection = async () => {
+  try {
+    const testRef = collection(db, "connectionTest");
+    const testDoc = await addDoc(testRef, { timestamp: new Date() });
+    await deleteDoc(doc(db, "connectionTest", testDoc.id));
+    return true;
+  } catch (error) {
+    console.error("Firestore connection test failed:", error);
+    return false;
+  }
+};

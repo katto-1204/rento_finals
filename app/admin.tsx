@@ -1,13 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { collection, addDoc, onSnapshot } from "firebase/firestore"
+import { collection, addDoc, onSnapshot, deleteDoc, doc } from "firebase/firestore"
 import { db } from "../config/firebase"
+import * as ImagePicker from 'expo-image-picker';
 
+// Update this constant for interface and admin state
 interface Car {
   id: string
   name: string
@@ -44,6 +46,7 @@ export default function AdminScreen() {
     carImage: "",
   })
   const [cars, setCars] = useState<Car[]>([]) // Update this line
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -73,49 +76,118 @@ export default function AdminScreen() {
     fetchCars()
   }, [])
 
-  const handleAddCar = async () => {
-    if (!newCar.name || !newCar.brand || !newCar.price) {
-      Alert.alert("Error", "Please fill in all required fields")
-      return
+  // Add this type for form validation
+  interface FormErrors {
+    [key: string]: string;
+  }
+
+  // Add this validation helper
+  const validateCarData = (data: typeof newCar): FormErrors => {
+    const errors: FormErrors = {};
+    
+    if (!data.name) errors.name = "Model name is required";
+    if (!data.brand) errors.brand = "Brand is required";
+    if (!data.price || isNaN(parseFloat(data.price))) {
+      errors.price = "Valid price is required";
+    }
+    if (!data.seats || isNaN(parseInt(data.seats))) {
+      errors.seats = "Valid number of seats is required";
+    }
+    
+    return errors;
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+    if (status !== 'granted') {
+      Alert.alert('Permission needed', 'Please grant camera roll permissions to upload images.');
+      return;
     }
 
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [16, 9],
+      quality: 0.5,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setNewCar(prev => ({ ...prev, carImage: base64Image }));
+    }
+  };
+
+  // Replace your existing handleAddCar function with this one
+  const handleAddCar = async () => {
+    if (isSubmitting) return;
+
+    // Validate required fields
+    if (!newCar.name || !newCar.brand || !newCar.price || !newCar.carImage) {
+      Alert.alert('Error', 'Please fill all required fields and add an image');
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
+      // Create car data object
       const carData = {
-        name: newCar.name,
-        brand: newCar.brand,
+        name: newCar.name.trim(),
+        brand: newCar.brand.trim(),
         pricePerDay: Number(newCar.price),
-        type: newCar.type || "",
-        fuel: newCar.fuel || "",
+        type: newCar.type.trim() || 'Not specified',
+        fuel: newCar.fuel.trim() || 'Not specified',
         seats: Number(newCar.seats) || 0,
-        image: newCar.carImage || "",
-        createdAt: new Date(),
-        status: "Available",
+        image: newCar.carImage,
+        createdAt: new Date().toISOString(),
+        status: 'Available',
         bookings: 0,
         rating: 0,
-        availability: true,
-      }
+        availability: true
+      };
 
-      await addDoc(collection(db, "cars"), carData)
+      // Debug log
+      console.log('Adding car to Firestore:', carData);
 
-      Alert.alert("Success", "Car added successfully!", [
-        {
-          text: "OK",
-          onPress: () => {
-            setShowAddCarForm(false)
-            setNewCar({
-              name: "",
-              brand: "",
-              price: "",
-              type: "",
-              fuel: "",
-              seats: "",
-              carImage: "",
-            })
-          },
-        },
-      ])
+      // Add to Firestore
+      const docRef = await addDoc(collection(db, 'cars'), carData);
+      console.log('Car added with ID:', docRef.id);
+
+      Alert.alert('Success', 'Car added successfully!');
+      
+      // Reset form
+      setNewCar({
+        name: "",
+        brand: "",
+        price: "",
+        type: "",
+        fuel: "",
+        seats: "",
+        carImage: "",
+      });
+      
+      setShowAddCarForm(false);
+
     } catch (error: any) {
-      Alert.alert("Error", "Failed to add car: " + error.message)
+      console.error('Error adding car:', error);
+      Alert.alert(
+        'Error',
+        'Failed to add car. Please check your connection and try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  const handleDeleteCar = async (carId: string) => {
+    try {
+      await deleteDoc(doc(db, "cars", carId))
+      Alert.alert("Success", "Car deleted successfully.")
+    } catch (error) {
+      console.error("Error deleting car:", error)
+      Alert.alert("Error", "Failed to delete car. Please try again.")
     }
   }
 
@@ -196,23 +268,43 @@ export default function AdminScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Car Image (Base64)</Text>
-            <TextInput
-              style={[styles.input, styles.textArea]}
-              placeholder="Paste base64 encoded image here..."
-              value={newCar.carImage}
-              onChangeText={(text) => setNewCar({ ...newCar, carImage: text })}
-              multiline
-              numberOfLines={3}
-            />
+            <Text style={styles.inputLabel}>Car Image *</Text>
+            {newCar.carImage ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image 
+                  source={{ uri: newCar.carImage }} 
+                  style={styles.imagePreview} 
+                />
+                <TouchableOpacity 
+                  style={styles.changeImageButton}
+                  onPress={pickImage}
+                >
+                  <Text style={styles.changeImageText}>Change Image</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity 
+                style={styles.uploadButton} 
+                onPress={pickImage}
+              >
+                <Ionicons name="cloud-upload" size={24} color="#4169e1" />
+                <Text style={styles.uploadButtonText}>Upload Image</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.formButtons}>
             <TouchableOpacity style={styles.cancelButton} onPress={() => setShowAddCarForm(false)}>
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.submitButton} onPress={handleAddCar}>
-              <Text style={styles.submitButtonText}>Add Car</Text>
+            <TouchableOpacity 
+              style={[styles.submitButton, isSubmitting && styles.disabledButton]}
+              onPress={handleAddCar}
+              disabled={isSubmitting}
+            >
+              <Text style={styles.submitButtonText}>
+                {isSubmitting ? "Adding..." : "Add Car"}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -234,7 +326,10 @@ export default function AdminScreen() {
               <TouchableOpacity style={styles.editButton}>
                 <Ionicons name="pencil" size={16} color="#4169e1" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.deleteButton}>
+              <TouchableOpacity 
+                style={styles.deleteButton}
+                onPress={() => handleDeleteCar(car.id)}
+              >
                 <Ionicons name="trash" size={16} color="#ff4444" />
               </TouchableOpacity>
             </View>
@@ -318,6 +413,31 @@ export default function AdminScreen() {
         return renderCarsTab()
     }
   }
+
+
+
+  // Add at the top of your AdminScreen component
+  useEffect(() => {
+    const testFirestore = async () => {
+      try {
+        const testRef = collection(db, "test");
+        const testDoc = await addDoc(testRef, {
+          test: true,
+          timestamp: new Date().toISOString()
+        });
+        console.log("Firestore connection test successful, ID:", testDoc.id);
+        await deleteDoc(doc(db, "test", testDoc.id));
+      } catch (error) {
+        console.error("Firestore connection test failed:", error);
+        Alert.alert(
+          "Connection Error",
+          "Failed to connect to database. Please check console for details."
+        );
+      }
+    };
+
+    testFirestore();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -487,6 +607,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
   },
+  disabledButton: {
+    backgroundColor: "#d1e7dd",
+  },
   submitButtonText: {
     color: "#ffffff",
     fontSize: 16,
@@ -587,5 +710,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666666",
     textAlign: "center",
+  },
+  imagePreviewContainer: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    resizeMode: 'cover',
+  },
+  changeImageButton: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 8,
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  changeImageText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  uploadButton: {
+    borderWidth: 2,
+    borderColor: '#4169e1',
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#f8f9fa',
+  },
+  uploadButtonText: {
+    color: '#4169e1',
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 8,
   },
 })
