@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Modal,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { router } from "expo-router"
@@ -22,6 +23,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
+  const [adminModalVisible, setAdminModalVisible] = useState(false)
+  const [adminPassword, setAdminPassword] = useState("")
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -48,11 +51,63 @@ export default function LoginScreen() {
     }
   }
 
+  const handleAdminAccess = () => {
+    if (adminPassword === "ADMIN123") {
+      setAdminModalVisible(false)
+      setAdminPassword("")
+      router.replace("/admin") // Changed from router.push to router.replace
+    } else {
+      Alert.alert("Error", "Whoops! No entry.")
+      setAdminPassword("")
+    }
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={adminModalVisible}
+        onRequestClose={() => setAdminModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Are you the admin?</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter admin password"
+              secureTextEntry
+              value={adminPassword}
+              onChangeText={setAdminPassword}
+              onSubmitEditing={handleAdminAccess} // Add this line
+              returnKeyType="done" // Add this line
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity 
+                style={styles.modalButton} 
+                onPress={handleAdminAccess}
+                activeOpacity={0.7} // Add this line
+              >
+                <Text style={styles.modalButtonText}>Confirm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={() => {
+                  setAdminModalVisible(false)
+                  setAdminPassword("")
+                }}
+                activeOpacity={0.7} // Add this line
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <TouchableOpacity 
         style={styles.adminButton}
-        onPress={() => router.push("/admin")}
+        onPress={() => setAdminModalVisible(true)}
       >
         <Text style={styles.adminButtonText}>ADMIN</Text>
       </TouchableOpacity>
@@ -215,6 +270,56 @@ const styles = StyleSheet.create({
   adminButtonText: {
     color: '#000000',
     fontSize: 14,
+    fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    color: '#000000',
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    backgroundColor: '#f8f9fa',
+    width: '100%',
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButton: {
+    backgroundColor: '#FFB700',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    minWidth: 100,
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#666666',
+  },
+  modalButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '600',
   },
 })
