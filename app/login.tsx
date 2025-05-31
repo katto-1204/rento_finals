@@ -25,6 +25,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false)
   const [adminModalVisible, setAdminModalVisible] = useState(false)
   const [adminPassword, setAdminPassword] = useState("")
+  const [showErrorModal, setShowErrorModal] = useState(false)
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -55,10 +56,15 @@ export default function LoginScreen() {
     if (adminPassword === "ADMIN123") {
       setAdminModalVisible(false)
       setAdminPassword("")
-      router.replace("/admin") // Changed from router.push to router.replace
+      router.replace("/admin")
     } else {
-      Alert.alert("Error", "Whoops! No entry.")
+      setAdminModalVisible(false)
       setAdminPassword("")
+      setShowErrorModal(true)
+      // Auto dismiss error modal after 2 seconds
+      setTimeout(() => {
+        setShowErrorModal(false)
+      }, 2000)
     }
   }
 
@@ -101,6 +107,27 @@ export default function LoginScreen() {
                 <Text style={styles.modalButtonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Add this error modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showErrorModal}
+        onRequestClose={() => setShowErrorModal(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, styles.errorModalContent]}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowErrorModal(false)}
+            >
+              <Text style={styles.closeButtonText}>✕</Text>
+            </TouchableOpacity>
+            <Text style={styles.errorTitle}>Access Denied</Text>
+            <Text style={styles.errorMessage}>Whoops! Admin access only.</Text>
           </View>
         </View>
       </Modal>
@@ -321,5 +348,35 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorModalContent: {
+    position: 'relative',
+    paddingTop: 40, // Make room for close button
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  closeButtonText: {
+    fontSize: 18,
+    color: '#666666',
+    fontWeight: '600',
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FF3B30',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
   },
 })
