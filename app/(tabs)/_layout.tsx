@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router"
+import { View } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 
 export default function TabLayout() {
@@ -6,19 +7,33 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#4169e1",
-        tabBarInactiveTintColor: "#666666",
+        tabBarShowLabel: true,
         tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderTopWidth: 1,
-          borderTopColor: "#e0e0e0",
-          height: 60,
-          paddingBottom: 8,
-          paddingTop: 8,
+          position: 'absolute',
+          bottom: 20,
+          left: 20,
+          right: 20,
+          elevation: 5,
+          backgroundColor: '#4169e1',
+          borderRadius: 25,
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 10,
+          borderTopWidth: 0,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 4,
+          },
+          shadowOpacity: 0.3,
+          shadowRadius: 4,
         },
+        tabBarActiveTintColor: '#FFE600',
+        tabBarInactiveTintColor: '#cccccc',
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: "600",
+          fontWeight: '600',
+          paddingBottom: 5,
         },
       }}
     >
@@ -26,35 +41,55 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="home" size={24} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
           title: "Search",
-          tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="search" size={24} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="bookings"
         options={{
           title: "Bookings",
-          tabBarIcon: ({ color, size }) => <Ionicons name="calendar" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="calendar" size={24} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="notifications"
         options={{
-          title: "Notifications",
-          tabBarIcon: ({ color, size }) => <Ionicons name="notifications" size={size} color={color} />,
+          title: "Alerts",
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="notifications" size={24} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, size }) => <Ionicons name="person" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+              <Ionicons name="person" size={24} color={color} />
+            </View>
+          ),
         }}
       />
     </Tabs>
