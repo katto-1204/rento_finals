@@ -191,6 +191,42 @@ export default function AdminScreen() {
     }
   }
 
+  const renderCarCard = (car: Car) => (
+    <View style={styles.carCard}>
+      {car.image && (
+        <Image
+          source={{ uri: car.image }}
+          style={styles.carImage}
+          resizeMode="cover"
+        />
+      )}
+      <View style={styles.carInfo}>
+        <Text style={styles.carName}>{car.name}</Text>
+        <Text style={styles.carBrand}>{car.brand}</Text>
+        <Text style={styles.carPrice}>${car.pricePerDay}/day</Text>
+        <View style={styles.carStats}>
+          <Text style={styles.carStat}>Type: {car.type}</Text>
+          <Text style={styles.carStat}>Seats: {car.seats}</Text>
+        </View>
+        <View style={styles.carStatus}>
+          <Text>Status: {car.status}</Text>
+          <Text>Bookings: {car.bookings}</Text>
+        </View>
+      </View>
+      <View style={styles.carActions}>
+        <TouchableOpacity style={styles.editButton}>
+          <Ionicons name="pencil" size={16} color="#4169e1" />
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={() => handleDeleteCar(car.id)}
+        >
+          <Ionicons name="trash" size={16} color="#ff4444" />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
   const renderCarsTab = () => (
     <View style={styles.tabContent}>
       <View style={styles.tabHeader}>
@@ -311,30 +347,7 @@ export default function AdminScreen() {
       )}
 
       <View style={styles.carsList}>
-        {cars.map((car) => (
-          <View key={car.id} style={styles.carCard}>
-            <View style={styles.carInfo}>
-              <Text style={styles.carName}>{car.name}</Text>
-              <Text style={styles.carBrand}>{car.brand}</Text>
-              <Text style={styles.carPrice}>${car.pricePerDay}/day</Text>
-              <View style={styles.carStats}>
-                <Text style={styles.carStat}>Status: {car.status}</Text>
-                <Text style={styles.carStat}>Bookings: {car.bookings}</Text>
-              </View>
-            </View>
-            <View style={styles.carActions}>
-              <TouchableOpacity style={styles.editButton}>
-                <Ionicons name="pencil" size={16} color="#4169e1" />
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={styles.deleteButton}
-                onPress={() => handleDeleteCar(car.id)}
-              >
-                <Ionicons name="trash" size={16} color="#ff4444" />
-              </TouchableOpacity>
-            </View>
-          </View>
-        ))}
+        {cars.map((car) => renderCarCard(car))}
       </View>
     </View>
   )
@@ -619,41 +632,43 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   carCard: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  carImage: {
+    width: '100%',
+    height: 160,
+    borderRadius: 8,
+    marginBottom: 12,
   },
   carInfo: {
-    flex: 1,
+    gap: 4,
   },
   carName: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#000000",
-    marginBottom: 4,
+    fontWeight: '600',
+    color: '#000000',
   },
   carBrand: {
     fontSize: 14,
-    color: "#666666",
-    marginBottom: 4,
+    color: '#666666',
   },
   carPrice: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#4169e1",
-    marginBottom: 8,
+    fontWeight: '600',
+    color: '#4169e1',
+  },
+  carStatus: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
   },
   carStats: {
     flexDirection: "row",
