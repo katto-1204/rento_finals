@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, Image, Animated } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
@@ -40,12 +40,13 @@ const chartConfig = {
   backgroundColor: "#ffffff",
   backgroundGradientFrom: "#ffffff",
   backgroundGradientTo: "#ffffff",
-  decimalPlaces: 0,
   color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
-  style: {
-    borderRadius: 16
-  },
+  strokeWidth: 2,
+  barPercentage: 0.7,
+  propsForLabels: {
+    fontSize: 12
+  }
 }
 
 export default function AdminScreen() {
@@ -62,6 +63,38 @@ export default function AdminScreen() {
   })
   const [cars, setCars] = useState<Car[]>([]) // Update this line
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Add these animation states at the top of AdminScreen
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [slideAnim] = useState(new Animated.Value(50));
+  const [scaleAnim] = useState(new Animated.Value(0.9));
+
+  // Add this animation effect
+  useEffect(() => {
+    // Reset animations when tab changes
+    fadeAnim.setValue(0);
+    slideAnim.setValue(50);
+    scaleAnim.setValue(0.9);
+
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 20,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [activeTab]); // Add activeTab as dependency to re-run animation on tab change
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -407,30 +440,70 @@ export default function AdminScreen() {
     </View>
   )
 
+  // Update your renderReportsTab function
   const renderReportsTab = () => (
-    <View style={styles.tabContent}>
+    <Animated.ScrollView 
+      style={[
+        styles.tabContent,
+        { opacity: fadeAnim }
+      ]}
+    >
       <Text style={styles.tabTitle}>Reports & Analytics</Text>
       
-      {/* Revenue Overview */}
-      <View style={styles.chartCard}>
+      <Animated.View 
+        style={[
+          styles.chartCard,
+          {
+            transform: [{ translateY: slideAnim }],
+            opacity: fadeAnim
+          }
+        ]}
+      >
         <Text style={styles.chartTitle}>Revenue Overview</Text>
         <LineChart
           data={{
             labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
             datasets: [{
-              data: [35000, 42000, 38000, 45000, 52000, 48000]
+              data: [35000, 42000, 38000, 45000, 52000, 48000],
+              strokeWidth: 2,
+              color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`
             }]
           }}
           width={screenWidth - 40}
           height={220}
-          chartConfig={chartConfig}
+          chartConfig={{
+            ...chartConfig,
+            propsForDots: {
+              r: 6,
+              strokeWidth: 2,
+              stroke: "#4169e1"
+            },
+            propsForLabels: {
+              fontSize: 12
+            },
+            decimalPlaces: 0,
+            formatYLabel: (yLabel: string) => `$${(parseInt(yLabel)/1000)}k`
+          }}
           bezier
           style={styles.chart}
+          withDots={true}
+          withVerticalLines={true}
+          withHorizontalLines={true}
+          withVerticalLabels={true}
+          withHorizontalLabels={true}
+          fromZero
         />
-      </View>
+      </Animated.View>
 
-      {/* Popular Car Types */}
-      <View style={styles.chartCard}>
+      <Animated.View 
+        style={[
+          styles.chartCard,
+          {
+            transform: [{ translateY: slideAnim }],
+            opacity: fadeAnim
+          }
+        ]}
+      >
         <Text style={styles.chartTitle}>Popular Car Types</Text>
         <BarChart
           data={{
@@ -442,36 +515,28 @@ export default function AdminScreen() {
           width={screenWidth - 40}
           height={220}
           yAxisLabel=""
-          yAxisSuffix=""
+          yAxisSuffix=" cars"
           chartConfig={{
             ...chartConfig,
             barPercentage: 0.7,
-            propsForLabels: {
-              fontSize: 12,
-            },
+            formatYLabel: (yLabel: string) => Math.round(parseFloat(yLabel)).toString()
           }}
           style={styles.chart}
-          showValuesOnTopOfBars
+          showValuesOnTopOfBars={true}
           fromZero
+          withHorizontalLabels
         />
-      </View>
+      </Animated.View>
 
-      {/* Booking Statistics */}
-      <View style={styles.statsRow}>
-        <View style={styles.statCardLarge}>
-          <Text style={styles.statNumber}>1,234</Text>
-          <Text style={styles.statLabel}>Total Bookings</Text>
-          <Text style={styles.statGrowth}>↑ 12% from last month</Text>
-        </View>
-        <View style={styles.statCardLarge}>
-          <Text style={styles.statNumber}>$52,450</Text>
-          <Text style={styles.statLabel}>Monthly Revenue</Text>
-          <Text style={styles.statGrowth}>↑ 8% from last month</Text>
-        </View>
-      </View>
-
-      {/* Key Metrics */}
-      <View style={styles.metricsGrid}>
+      <Animated.View 
+        style={[
+          styles.metricsGrid,
+          {
+            transform: [{ scale: scaleAnim }],
+            opacity: fadeAnim
+          }
+        ]}
+      >
         <View style={styles.metricCard}>
           <Text style={styles.metricValue}>4.8</Text>
           <Text style={styles.metricLabel}>Average Rating</Text>
@@ -488,8 +553,8 @@ export default function AdminScreen() {
           <Text style={styles.metricValue}>24h</Text>
           <Text style={styles.metricLabel}>Avg. Response</Text>
         </View>
-      </View>
-    </View>
+      </Animated.View>
+    </Animated.ScrollView>
   )
 
   const renderTabContent = () => {
@@ -846,11 +911,11 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   chartCard: {
-    backgroundColor: "#ffffff",
+    backgroundColor: '#ffffff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -858,18 +923,19 @@ const styles = StyleSheet.create({
   },
   chartTitle: {
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: '600',
     marginBottom: 16,
-    color: "#000000",
+    color: '#000000',
   },
   chart: {
     marginVertical: 8,
-    borderRadius: 16,
+    borderRadius: 16
   },
   statsRow: {
     flexDirection: "row",
     gap: 16,
     marginBottom: 16,
+    transform: [{ scale: 1 }], // Enable hardware acceleration
   },
   statCardLarge: {
     flex: 1,
@@ -891,6 +957,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 16,
+    transform: [{ scale: 1 }], // Enable hardware acceleration
   },
   metricCard: {
     width: "45%",
