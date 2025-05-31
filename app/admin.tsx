@@ -28,6 +28,31 @@ interface Car {
   availability: boolean
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  joinDate: string;
+  status: 'active' | 'inactive';
+  bookings: number;
+  avatar: string;
+}
+
+// Add this interface at the top with your other interfaces
+interface Booking {
+  id: string;
+  carName: string;
+  carImage: string;
+  customerName: string;
+  customerAvatar: string;
+  startDate: string;
+  endDate: string;
+  totalAmount: number;
+  status: 'active' | 'completed' | 'cancelled';
+  paymentStatus: 'paid' | 'pending' | 'refunded';
+}
+
 const adminTabs = [
   { id: "cars", name: "Manage Cars", icon: "car" },
   { id: "bookings", name: "Bookings", icon: "calendar" },
@@ -48,6 +73,89 @@ const chartConfig = {
     fontSize: 12
   }
 }
+
+const dummyUsers: User[] = [
+  {
+    id: '1',
+    name: 'Sir Romar',
+    email: 'sir.romar@email.com',
+    phone: '+1 234 567 8900',
+    joinDate: '2024-01-15',
+    status: 'active',
+    bookings: 8,
+    avatar: 'https://ui-avatars.com/api/?name=Sir+Romar&background=4169e1&color=fff'
+  },
+  {
+    id: '2',
+    name: 'Kiesha Jimenez',
+    email: 'kiesha.jimenez@email.com',
+    phone: '+1 234 567 8901',
+    joinDate: '2024-02-20',
+    status: 'active',
+    bookings: 3,
+    avatar: 'https://ui-avatars.com/api/?name=Kiesha+Jimenez&background=4169e1&color=fff'
+  },
+  {
+    id: '3',
+    name: 'Sir Lauron',
+    email: 'sir.lauron@email.com',
+    phone: '+1 234 567 8902',
+    joinDate: '2024-02-28',
+    status: 'inactive',
+    bookings: 0,
+    avatar: 'https://ui-avatars.com/api/?name=Sir+Lauron&background=4169e1&color=fff'
+  },
+  {
+    id: '4',
+    name: 'AKO NI KAPOY NA',
+    email: 'huhuhhu.j@email.com',
+    phone: '+1 234 567 8903',
+    joinDate: '2024-03-05',
+    status: 'active',
+    bookings: 5,
+    avatar: 'https://ui-avatars.com/api/?name=AKO+NI+KAPOY+NA&background=4169e1&color=fff'
+  }
+];
+
+// Add this dummy data before your AdminScreen component
+const dummyBookings: Booking[] = [
+  {
+    id: 'b1',
+    carName: 'BMW X5',
+    carImage: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800',
+    customerName: 'Sir Romar',
+    customerAvatar: 'https://ui-avatars.com/api/?name=Sir+Romar&background=4169e1&color=fff',
+    startDate: '2024-03-01',
+    endDate: '2024-03-05',
+    totalAmount: 580,
+    status: 'active',
+    paymentStatus: 'paid'
+  },
+  {
+    id: 'b2',
+    carName: 'Mercedes C-Class',
+    carImage: 'https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800',
+    customerName: 'Kiesha Jimenez',
+    customerAvatar: 'https://ui-avatars.com/api/?name=Kiesha+Jimenez&background=4169e1&color=fff',
+    startDate: '2024-03-10',
+    endDate: '2024-03-12',
+    totalAmount: 420,
+    status: 'completed',
+    paymentStatus: 'paid'
+  },
+  {
+    id: 'b3',
+    carName: 'Audi A4',
+    carImage: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800',
+    customerName: 'Sir Lauron',
+    customerAvatar: 'https://ui-avatars.com/api/?name=Sir+Lauron&background=4169e1&color=fff',
+    startDate: '2024-03-15',
+    endDate: '2024-03-16',
+    totalAmount: 290,
+    status: 'cancelled',
+    paymentStatus: 'refunded'
+  }
+];
 
 export default function AdminScreen() {
   const [activeTab, setActiveTab] = useState("cars")
@@ -400,110 +508,266 @@ export default function AdminScreen() {
     </View>
   )
 
+  // Update the renderBookingsTab function
   const renderBookingsTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Manage Bookings</Text>
+
       <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.statNumber}>24</Text>
           <Text style={styles.statLabel}>Active Bookings</Text>
-        </View>
-        <View style={styles.statCard}>
+          <Text style={styles.statGrowth}>↑ 12% from last week</Text>
+        </Animated.View>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.statNumber}>156</Text>
           <Text style={styles.statLabel}>Total Bookings</Text>
-        </View>
-        <View style={styles.statCard}>
+          <Text style={styles.statGrowth}>↑ 8% from last month</Text>
+        </Animated.View>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
           <Text style={styles.statNumber}>$12,450</Text>
           <Text style={styles.statLabel}>Monthly Revenue</Text>
-        </View>
+          <Text style={styles.statGrowth}>↑ 15% from last month</Text>
+        </Animated.View>
       </View>
+
+      <View style={styles.bookingsFilter}>
+        <View style={styles.filterTabs}>
+          <TouchableOpacity style={[styles.filterTab, styles.activeFilterTab]}>
+            <Text style={[styles.filterTabText, styles.activeFilterTabText]}>All</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterTab}>
+            <Text style={styles.filterTabText}>Active</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterTab}>
+            <Text style={styles.filterTabText}>Completed</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.filterTab}>
+            <Text style={styles.filterTabText}>Cancelled</Text>
+          </TouchableOpacity>
+        </View>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search bookings..."
+          placeholderTextColor="#666666"
+        />
+      </View>
+
+      <ScrollView style={styles.bookingsList}>
+        {dummyBookings.map(booking => (
+          <Animated.View 
+            key={booking.id}
+            style={[styles.bookingCard, { opacity: fadeAnim }]}
+          >
+            <View style={styles.bookingHeader}>
+              <Image
+                source={{ uri: booking.carImage }}
+                style={styles.bookingCarImage}
+              />
+              <View style={styles.bookingInfo}>
+                <Text style={styles.bookingCarName}>{booking.carName}</Text>
+                <View style={styles.customerInfo}>
+                  <Image
+                    source={{ uri: booking.customerAvatar }}
+                    style={styles.customerAvatar}
+                  />
+                  <Text style={styles.customerName}>{booking.customerName}</Text>
+                </View>
+              </View>
+              <View style={[
+                styles.statusBadge,
+                booking.status === 'active' ? styles.activeBadge :
+                booking.status === 'completed' ? styles.completedBadge :
+                styles.cancelledBadge
+              ]}>
+                <Text style={[
+                  styles.statusText,
+                  booking.status === 'active' ? styles.activeText :
+                  booking.status === 'completed' ? styles.completedText :
+                  styles.cancelledText
+                ]}>
+                  {booking.status}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.bookingDetails}>
+              <View style={styles.bookingDetailRow}>
+                <View style={styles.bookingDetailItem}>
+                  <Ionicons name="calendar-outline" size={16} color="#666666" />
+                  <Text style={styles.bookingDetailText}>
+                    {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}
+                  </Text>
+                </View>
+                <View style={styles.bookingDetailItem}>
+                  <Ionicons name="cash-outline" size={16} color="#666666" />
+                  <Text style={styles.bookingDetailText}>
+                    ${booking.totalAmount}
+                  </Text>
+                </View>
+              </View>
+              <View style={[
+                styles.paymentStatus,
+                booking.paymentStatus === 'paid' ? styles.paidStatus :
+                booking.paymentStatus === 'pending' ? styles.pendingStatus :
+                styles.refundedStatus
+              ]}>
+                <Ionicons 
+                  name={booking.paymentStatus === 'paid' ? 'checkmark-circle' : 
+                        booking.paymentStatus === 'pending' ? 'time' : 'refresh-circle'} 
+                  size={16} 
+                  color={booking.paymentStatus === 'paid' ? '#00a152' :
+                         booking.paymentStatus === 'pending' ? '#ffa000' : '#ff4444'} 
+                />
+                <Text style={[
+                  styles.paymentStatusText,
+                  booking.paymentStatus === 'paid' ? styles.paidText :
+                  booking.paymentStatus === 'pending' ? styles.pendingText :
+                  styles.refundedText
+                ]}>
+                  {booking.paymentStatus}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.bookingActions}>
+              <TouchableOpacity style={styles.bookingActionButton}>
+                <Ionicons name="eye-outline" size={18} color="#4169e1" />
+                <Text style={styles.actionButtonText}>View Details</Text>
+              </TouchableOpacity>
+              {booking.status === 'active' && (
+                <TouchableOpacity style={[styles.bookingActionButton, styles.cancelButton]}>
+                  <Ionicons name="close-circle-outline" size={18} color="#ff4444" />
+                  <Text style={[styles.actionButtonText, styles.cancelButtonText]}>Cancel</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </Animated.View>
+        ))}
+      </ScrollView>
     </View>
   )
 
+  // Add before renderTabContent()
   const renderUsersTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Manage Users</Text>
-      <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>1,234</Text>
-          <Text style={styles.statLabel}>Total Users</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>89</Text>
-          <Text style={styles.statLabel}>New This Month</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>95%</Text>
-          <Text style={styles.statLabel}>Active Users</Text>
-        </View>
-      </View>
-    </View>
-  )
 
-  // Update your renderReportsTab function
+      <View style={styles.statsGrid}>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
+          <Text style={styles.statNumber}>{dummyUsers.length}</Text>
+          <Text style={styles.statLabel}>Total Users</Text>
+        </Animated.View>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
+          <Text style={styles.statNumber}>
+            {dummyUsers.filter(user => user.status === 'active').length}
+          </Text>
+          <Text style={styles.statLabel}>Active Users</Text>
+        </Animated.View>
+        <Animated.View style={[styles.statCard, { transform: [{ scale: scaleAnim }] }]}>
+          <Text style={styles.statNumber}>
+            {dummyUsers.reduce((acc, user) => acc + user.bookings, 0)}
+          </Text>
+          <Text style={styles.statLabel}>Total Bookings</Text>
+        </Animated.View>
+      </View>
+
+      <View style={styles.userFilters}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search users..."
+          placeholderTextColor="#666666"
+        />
+        <TouchableOpacity style={styles.filterButton}>
+          <Ionicons name="filter" size={18} color="#4169e1" />
+          <Text style={styles.filterButtonText}>Filter</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView style={styles.usersList}>
+        {dummyUsers.map(user => (
+          <Animated.View 
+            key={user.id}
+            style={[styles.userCard, { opacity: fadeAnim }]}
+          >
+            <View style={styles.userHeader}>
+              <View style={styles.userInfo}>
+                <Image source={{ uri: user.avatar }} style={styles.userAvatar} />
+                <View>
+                  <Text style={styles.userName}>{user.name}</Text>
+                  <Text style={styles.userEmail}>{user.email}</Text>
+                </View>
+              </View>
+              <View style={[
+                styles.statusBadge,
+                user.status === 'active' ? styles.activeBadge : styles.inactiveBadge
+              ]}>
+                <Text style={[
+                  styles.statusText,
+                  user.status === 'active' ? styles.activeText : styles.inactiveText
+                ]}>
+                  {user.status}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.userDetails}>
+              <View style={styles.userDetailItem}>
+                <Ionicons name="call-outline" size={16} color="#666666" />
+                <Text style={styles.userDetailText}>{user.phone}</Text>
+              </View>
+              <View style={styles.userDetailItem}>
+                <Ionicons name="calendar-outline" size={16} color="#666666" />
+                <Text style={styles.userDetailText}>
+                  Joined {new Date(user.joinDate).toLocaleDateString()}
+                </Text>
+              </View>
+              <View style={styles.userDetailItem}>
+                <Ionicons name="car-outline" size={16} color="#666666" />
+                <Text style={styles.userDetailText}>{user.bookings} bookings</Text>
+              </View>
+            </View>
+
+            <View style={styles.userActions}>
+              <TouchableOpacity style={styles.userAction}>
+                <Ionicons name="create-outline" size={18} color="#4169e1" />
+                <Text style={styles.actionText}>Edit</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.userAction}>
+                <Ionicons name="trash-outline" size={18} color="#ff4444" />
+                <Text style={[styles.actionText, { color: '#ff4444' }]}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
   const renderReportsTab = () => (
     <Animated.ScrollView 
-      style={[
-        styles.tabContent,
-        { opacity: fadeAnim }
-      ]}
+      style={[styles.tabContent, { opacity: fadeAnim }]}
     >
       <Text style={styles.tabTitle}>Reports & Analytics</Text>
       
-      <Animated.View 
-        style={[
-          styles.chartCard,
-          {
-            transform: [{ translateY: slideAnim }],
-            opacity: fadeAnim
-          }
-        ]}
-      >
+      <View style={styles.chartCard}>
         <Text style={styles.chartTitle}>Revenue Overview</Text>
         <LineChart
           data={{
             labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
             datasets: [{
-              data: [35000, 42000, 38000, 45000, 52000, 48000],
-              strokeWidth: 2,
-              color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`
+              data: [35000, 42000, 38000, 45000, 52000, 48000]
             }]
           }}
           width={screenWidth - 40}
           height={220}
-          chartConfig={{
-            ...chartConfig,
-            propsForDots: {
-              r: 6,
-              strokeWidth: 2,
-              stroke: "#4169e1"
-            },
-            propsForLabels: {
-              fontSize: 12
-            },
-            decimalPlaces: 0,
-            formatYLabel: (yLabel: string) => `$${(parseInt(yLabel)/1000)}k`
-          }}
+          chartConfig={chartConfig}
           bezier
           style={styles.chart}
-          withDots={true}
-          withVerticalLines={true}
-          withHorizontalLines={true}
-          withVerticalLabels={true}
-          withHorizontalLabels={true}
-          fromZero
         />
-      </Animated.View>
+      </View>
 
-      <Animated.View 
-        style={[
-          styles.chartCard,
-          {
-            transform: [{ translateY: slideAnim }],
-            opacity: fadeAnim
-          }
-        ]}
-      >
+      <View style={styles.chartCard}>
         <Text style={styles.chartTitle}>Popular Car Types</Text>
         <BarChart
           data={{
@@ -516,46 +780,14 @@ export default function AdminScreen() {
           height={220}
           yAxisLabel=""
           yAxisSuffix=" cars"
-          chartConfig={{
-            ...chartConfig,
-            barPercentage: 0.7,
-            formatYLabel: (yLabel: string) => Math.round(parseFloat(yLabel)).toString()
-          }}
+          chartConfig={chartConfig}
           style={styles.chart}
-          showValuesOnTopOfBars={true}
+          showValuesOnTopOfBars
           fromZero
-          withHorizontalLabels
         />
-      </Animated.View>
-
-      <Animated.View 
-        style={[
-          styles.metricsGrid,
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: fadeAnim
-          }
-        ]}
-      >
-        <View style={styles.metricCard}>
-          <Text style={styles.metricValue}>4.8</Text>
-          <Text style={styles.metricLabel}>Average Rating</Text>
-        </View>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricValue}>85%</Text>
-          <Text style={styles.metricLabel}>Car Utilization</Text>
-        </View>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricValue}>342</Text>
-          <Text style={styles.metricLabel}>Active Users</Text>
-        </View>
-        <View style={styles.metricCard}>
-          <Text style={styles.metricValue}>24h</Text>
-          <Text style={styles.metricLabel}>Avg. Response</Text>
-        </View>
-      </Animated.View>
+      </View>
     </Animated.ScrollView>
-  )
+  );
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -981,5 +1213,284 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666666",
     textAlign: "center",
+  },
+  userFilters: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 12,
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+  },
+  usersList: {
+    marginTop: 16,
+  },
+  userCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  userHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  userAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+  },
+  userEmail: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  activeBadge: {
+    backgroundColor: '#e6f4ea',
+  },
+  inactiveBadge: {
+    backgroundColor: '#feecea',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  activeText: {
+    color: '#00a152',
+  },
+  inactiveText: {
+    color: '#ff4444',
+  },
+  userDetails: {
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+    paddingTop: 12,
+    gap: 8,
+  },
+  userDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  userDetailText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  userActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  userAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 8,
+    borderRadius: 8,
+  },
+  actionText: {
+    fontSize: 14,
+    color: '#4169e1',
+    fontWeight: '600',
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f8ff',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  filterButtonText: {
+    color: '#4169e1',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bookingsFilter: {
+    marginTop: 20,
+    gap: 12,
+  },
+  filterTabs: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  filterTab: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#f8f9fa',
+  },
+  activeFilterTab: {
+    backgroundColor: '#4169e1',
+  },
+  filterTabText: {
+    color: '#666666',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  activeFilterTabText: {
+    color: '#ffffff',
+  },
+  bookingsList: {
+    marginTop: 16,
+  },
+  bookingCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  bookingHeader: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
+  bookingCarImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+  },
+  bookingInfo: {
+    flex: 1,
+  },
+  bookingCarName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#000000',
+    marginBottom: 4,
+  },
+  customerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  customerAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  customerName: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  completedBadge: {
+    backgroundColor: '#e6f4ea',
+  },
+  cancelledBadge: {
+    backgroundColor: '#feecea',
+  },
+  completedText: {
+    color: '#00a152',
+  },
+  cancelledText: {
+    color: '#ff4444',
+  },
+  bookingDetails: {
+    marginTop: 16,
+    gap: 12,
+  },
+  bookingDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bookingDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  bookingDetailText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  paymentStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    alignSelf: 'flex-start',
+  },
+  paidStatus: {
+    backgroundColor: '#e6f4ea',
+  },
+  pendingStatus: {
+    backgroundColor: '#fff3e0',
+  },
+  refundedStatus: {
+    backgroundColor: '#feecea',
+  },
+  paymentStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'capitalize',
+  },
+  paidText: {
+    color: '#00a152',
+  },
+  pendingText: {
+    color: '#ffa000',
+  },
+  refundedText: {
+    color: '#ff4444',
+  },
+  bookingActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  bookingActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f0f8ff',
+  },
+  actionButtonText: {
+    fontSize: 14,
+    color: '#4169e1',
+    fontWeight: '600',
   },
 })
