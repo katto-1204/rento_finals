@@ -8,6 +8,8 @@ import { router } from "expo-router"
 import { collection, addDoc, onSnapshot, deleteDoc, doc } from "firebase/firestore"
 import { db } from "../config/firebase"
 import * as ImagePicker from 'expo-image-picker';
+import { LineChart, BarChart, PieChart } from "react-native-chart-kit"
+import { Dimensions } from "react-native"
 
 // Update this constant for interface and admin state
 interface Car {
@@ -32,6 +34,19 @@ const adminTabs = [
   { id: "users", name: "Users", icon: "people" },
   { id: "reports", name: "Reports", icon: "analytics" },
 ]
+
+const screenWidth = Dimensions.get("window").width
+const chartConfig = {
+  backgroundColor: "#ffffff",
+  backgroundGradientFrom: "#ffffff",
+  backgroundGradientTo: "#ffffff",
+  decimalPlaces: 0,
+  color: (opacity = 1) => `rgba(65, 105, 225, ${opacity})`,
+  labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+  style: {
+    borderRadius: 16
+  },
+}
 
 export default function AdminScreen() {
   const [activeTab, setActiveTab] = useState("cars")
@@ -395,18 +410,83 @@ export default function AdminScreen() {
   const renderReportsTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Reports & Analytics</Text>
-      <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>$45,230</Text>
-          <Text style={styles.statLabel}>Total Revenue</Text>
+      
+      {/* Revenue Overview */}
+      <View style={styles.chartCard}>
+        <Text style={styles.chartTitle}>Revenue Overview</Text>
+        <LineChart
+          data={{
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [{
+              data: [35000, 42000, 38000, 45000, 52000, 48000]
+            }]
+          }}
+          width={screenWidth - 40}
+          height={220}
+          chartConfig={chartConfig}
+          bezier
+          style={styles.chart}
+        />
+      </View>
+
+      {/* Popular Car Types */}
+      <View style={styles.chartCard}>
+        <Text style={styles.chartTitle}>Popular Car Types</Text>
+        <BarChart
+          data={{
+            labels: ["SUV", "Sedan", "Sports", "Van", "Pickup"],
+            datasets: [{
+              data: [28, 35, 15, 12, 10]
+            }]
+          }}
+          width={screenWidth - 40}
+          height={220}
+          yAxisLabel=""
+          yAxisSuffix=""
+          chartConfig={{
+            ...chartConfig,
+            barPercentage: 0.7,
+            propsForLabels: {
+              fontSize: 12,
+            },
+          }}
+          style={styles.chart}
+          showValuesOnTopOfBars
+          fromZero
+        />
+      </View>
+
+      {/* Booking Statistics */}
+      <View style={styles.statsRow}>
+        <View style={styles.statCardLarge}>
+          <Text style={styles.statNumber}>1,234</Text>
+          <Text style={styles.statLabel}>Total Bookings</Text>
+          <Text style={styles.statGrowth}>↑ 12% from last month</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>342</Text>
-          <Text style={styles.statLabel}>Cars Rented</Text>
+        <View style={styles.statCardLarge}>
+          <Text style={styles.statNumber}>$52,450</Text>
+          <Text style={styles.statLabel}>Monthly Revenue</Text>
+          <Text style={styles.statGrowth}>↑ 8% from last month</Text>
         </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statNumber}>4.8</Text>
-          <Text style={styles.statLabel}>Avg Rating</Text>
+      </View>
+
+      {/* Key Metrics */}
+      <View style={styles.metricsGrid}>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricValue}>4.8</Text>
+          <Text style={styles.metricLabel}>Average Rating</Text>
+        </View>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricValue}>85%</Text>
+          <Text style={styles.metricLabel}>Car Utilization</Text>
+        </View>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricValue}>342</Text>
+          <Text style={styles.metricLabel}>Active Users</Text>
+        </View>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricValue}>24h</Text>
+          <Text style={styles.metricLabel}>Avg. Response</Text>
         </View>
       </View>
     </View>
@@ -764,5 +844,75 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginTop: 8,
+  },
+  chartCard: {
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 16,
+    color: "#000000",
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 16,
+  },
+  statCardLarge: {
+    flex: 1,
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statGrowth: {
+    color: "#00bb02",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  metricsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+  },
+  metricCard: {
+    width: "45%",
+    backgroundColor: "#ffffff",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  metricValue: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#4169e1",
+    marginBottom: 8,
+  },
+  metricLabel: {
+    fontSize: 14,
+    color: "#666666",
+    textAlign: "center",
   },
 })
