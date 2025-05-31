@@ -1,134 +1,168 @@
 "use client"
 
-import { ScrollView, View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from "react-native"
 import { useState } from "react"
 import { router } from "expo-router"
+import { SafeAreaView } from "react-native-safe-area-context"
+import { Ionicons } from '@expo/vector-icons'
+import Swiper from 'react-native-swiper'
 
 const { width } = Dimensions.get('window')
 
-const onboardingData = [
-  {
-    id: 1,
-    title: "Find Your Perfect Car",
-    subtitle: "Browse through hundreds of cars available for rent",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Q2FyIEltYWdlPC90ZXh0Pgo8L3N2Zz4K",
-  },
-  {
-    id: 2,
-    title: "Easy Booking Process",
-    subtitle: "Book your car in just a few simple steps",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qm9va2luZyBJbWFnZTwvdGV4dD4KPC9zdmc+Cg==",
-  },
-  {
-    id: 3,
-    title: "Safe & Secure",
-    subtitle: "All our cars are verified and insured for your safety",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNzUiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+U2FmZXR5IEltYWdlPC90ZXh0Pgo8L3N2Zz4K",
-  },
-]
+interface FeatureItemProps {
+  icon: keyof typeof Ionicons.glyphMap
+  text: string
+}
+
+const FeatureItem: React.FC<FeatureItemProps> = ({ icon, text }) => (
+  <View style={styles.featureItem}>
+    <Ionicons name={icon} size={24} color="#FFB700" />
+    <Text style={styles.featureText}>{text}</Text>
+  </View>
+)
 
 export default function WelcomeScreen() {
-  const [currentPage, setCurrentPage] = useState(0)
-
-  const handleNext = () => {
-    if (currentPage < onboardingData.length - 1) {
-      setCurrentPage(currentPage + 1)
-    } else {
-      router.replace('/login')
-    }
-  }
+  const [currentIndex, setCurrentIndex] = useState(0)
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => {
-          const offsetX = e.nativeEvent.contentOffset.x
-          const page = Math.round(offsetX / width)
-          setCurrentPage(page)
-        }}
+    <SafeAreaView style={styles.container}>
+      <Swiper
+        loop={false}
+        showsPagination={false}
+        style={styles.wrapper}
+        onIndexChanged={setCurrentIndex}
       >
-        {onboardingData.map((item, index) => (
-          <View key={item.id} style={styles.page}>
-            <Image source={{ uri: item.image }} style={styles.image} />
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.subtitle}</Text>
+        <View style={styles.slide}>
+          <Ionicons name="car-sport" size={80} color="#FFB700" />
+          <Text style={styles.logoText}>RENTO</Text>
+          <Text style={styles.title}>Find Your Perfect Ride</Text>
+          <Text style={styles.description}>Browse through our extensive collection of vehicles</Text>
+          <View style={styles.featureContainer}>
+            <FeatureItem icon="search" text="Search Cars" />
+            <FeatureItem icon="filter" text="Filter Options" />
+            <FeatureItem icon="location" text="Nearby Cars" />
           </View>
-        ))}
-      </ScrollView>
-
-      <View style={styles.footer}>
-        <View style={styles.dots}>
-          {onboardingData.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.dot,
-                currentPage === index && styles.activeDot
-              ]}
-            />
-          ))}
         </View>
-        <TouchableOpacity onPress={handleNext}>
-          <Text style={styles.nextButton}>
-            {currentPage === onboardingData.length - 1 ? 'Get Started' : 'Next'}
-          </Text>
-        </TouchableOpacity>
+
+        <View style={styles.slide}>
+          <Ionicons name="calendar" size={80} color="#FFB700" />
+          <Text style={styles.logoText}>QUICK BOOKING</Text>
+          <Text style={styles.title}>Book in Minutes</Text>
+          <Text style={styles.description}>Simple and fast booking process with secure payments</Text>
+          <View style={styles.featureContainer}>
+            <FeatureItem icon="time" text="Quick Process" />
+            <FeatureItem icon="card" text="Secure Payment" />
+            <FeatureItem icon="shield-checkmark" text="Verified Cars" />
+          </View>
+        </View>
+
+        <View style={styles.slide}>
+          <Ionicons name="key" size={80} color="#FFB700" />
+          <Text style={styles.logoText}>RENT A CAR?</Text>
+          <Text style={styles.title}>Start Your Journey</Text>
+          <Text style={styles.description}>Your adventure begins here</Text>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => router.replace('/login')}
+          >
+            <Text style={styles.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+        </View>
+      </Swiper>
+
+      <View style={styles.progressContainer}>
+        {[0, 1, 2].map((index) => (
+          <View
+            key={index}
+            style={[
+              styles.progressDot,
+              currentIndex === index && styles.activeProgressDot
+            ]}
+          />
+        ))}
       </View>
-    </View>
+    </SafeAreaView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1054CF',
   },
-  page: {
-    width,
+  wrapper: {},
+  slide: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 20,
   },
-  image: {
-    width: width * 0.8,
-    height: width * 0.6,
-    marginBottom: 40,
+  logoText: {
+    fontSize: 40,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
+    color: '#fff',
+    fontWeight: '600',
+    marginBottom: 15,
     textAlign: 'center',
-    color: '#666',
   },
-  footer: {
-    padding: 20,
+  description: {
+    fontSize: 16,
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: 40,
   },
-  dots: {
+  button: {
+    paddingVertical: 15,
+    paddingHorizontal: 50,
+    borderRadius: 30,
+    marginTop: 20,
+    backgroundColor: '#FFB700',
+    elevation: 3,
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  progressContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
+    position: 'absolute',
+    bottom: 50,
+    alignSelf: 'center',
+    gap: 8,
   },
-  dot: {
+  progressDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#ccc',
-    marginHorizontal: 4,
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
-  activeDot: {
-    backgroundColor: '#000',
+  activeProgressDot: {
+    width: 24,
+    backgroundColor: '#FFB700',
   },
-  nextButton: {
-    fontSize: 18,
-    color: '#000',
+  featureContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 30,
+  },
+  featureItem: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    padding: 15,
+    borderRadius: 12,
+    width: width * 0.25,
+  },
+  featureText: {
+    color: '#fff',
+    marginTop: 8,
+    fontSize: 12,
     textAlign: 'center',
   },
 })
