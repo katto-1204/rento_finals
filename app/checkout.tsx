@@ -4,7 +4,8 @@ import { useState } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
-import { router } from "expo-router"
+import { router, useLocalSearchParams } from "expo-router"
+import { cars } from "../data/cars"
 
 const COLORS = {
   background: "#ededed",
@@ -30,13 +31,24 @@ const paymentMethods = [
 ]
 
 export default function CheckoutScreen() {
+  const { carId } = useLocalSearchParams<{ carId: string }>()
+  const car = cars.find(c => c.id === carId)
+
   const [selectedAddOns, setSelectedAddOns] = useState(addOns)
   const [selectedPayment, setSelectedPayment] = useState(1)
   const [pickupDate, setPickupDate] = useState("Dec 25, 2024")
   const [dropoffDate, setDropoffDate] = useState("Dec 28, 2024")
   const [pickupLocation, setPickupLocation] = useState("Davao Airport")
 
-  const basePrice = 120
+  if (!car) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>Car not found</Text>
+      </View>
+    )
+  }
+
+  const basePrice = car.pricePerDay
   const days = 3
   const subtotal = basePrice * days
   const addOnTotal = selectedAddOns.filter((addon) => addon.selected).reduce((sum, addon) => sum + addon.price, 0)
@@ -49,10 +61,10 @@ export default function CheckoutScreen() {
     )
   }
 
-  const handleConfirmBooking = () => {
+  const handleConfirmBooking = (car: any) => {
     Alert.alert(
       "Booking Confirmed!",
-      "Your BMW X5 has been booked successfully. You will receive a confirmation email shortly.",
+      `Your ${car.name} has been booked successfully. You will receive a confirmation email shortly.`,
       [
         {
           text: "OK",
@@ -77,8 +89,12 @@ export default function CheckoutScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Booking Summary</Text>
           <View style={styles.carSummary}>
-            <Text style={styles.carName}>BMW X5</Text>
-            <Text style={styles.carPrice}>${basePrice}/day</Text>
+            <View style={styles.carDetails}>
+              <Text style={styles.carName}>{car.name}</Text>
+              <Text style={styles.carBrand}>{car.brand}</Text>
+              <Text style={styles.carLocation}>{car.location}</Text>
+            </View>
+            <Text style={styles.carPrice}>${car.pricePerDay}/day</Text>
           </View>
         </View>
 
@@ -178,8 +194,13 @@ export default function CheckoutScreen() {
 
       {/* Confirm Button */}
       <View style={styles.confirmContainer}>
-        <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmBooking}>
-          <Text style={styles.confirmButtonText}>Confirm Booking - ${total.toFixed(2)}</Text>
+        <TouchableOpacity 
+          style={styles.confirmButton} 
+          onPress={() => handleConfirmBooking(car)}
+        >
+          <Text style={styles.confirmButtonText}>
+            Confirm Booking - ${total.toFixed(2)}
+          </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -219,18 +240,35 @@ const styles = StyleSheet.create({
     color: COLORS.black,
     marginBottom: 16,
   },
-  carSummary: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    padding: 16,
-    borderRadius: 12,
+  carDetails: {
+    flex: 1,
   },
   carName: {
     fontSize: 18,
     fontWeight: "600",
     color: COLORS.black,
+    marginBottom: 4,
+  },
+  carBrand: {
+    fontSize: 14,
+    color: COLORS.gray,
+    marginBottom: 2,
+  },
+  carLocation: {
+    fontSize: 14,
+    color: COLORS.gray,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  carSummary: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    backgroundColor: COLORS.white,
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
   },
   carPrice: {
     fontSize: 16,
