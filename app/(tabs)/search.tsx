@@ -20,14 +20,14 @@ import { cars } from "../../data/cars"
 const { width } = Dimensions.get("window")
 
 const brands = [
-  { id: 1, name: "BMW", logo: "🚗" },
-  { id: 2, name: "Mercedes", logo: "🚙" },
-  { id: 3, name: "Audi", logo: "🚗" },
-  { id: 4, name: "Toyota", logo: "🚙" },
-  { id: 5, name: "Honda", logo: "🚗" },
-  { id: 6, name: "Nissan", logo: "🚙" },
-  { id: 7, name: "Ford", logo: "🚗" },
-  { id: 8, name: "Hyundai", logo: "🚙" },
+  { id: 1, name: "BMW", logo: require("../../assets/brandlogos/bmw.png") },
+  { id: 2, name: "Mercedes", logo: require("../../assets/brandlogos/mercedes.png") },
+  { id: 3, name: "Audi", logo: require("../../assets/brandlogos/audi.png") },
+  { id: 4, name: "Toyota", logo: require("../../assets/brandlogos/toyota.png") },
+  { id: 5, name: "Honda", logo: require("../../assets/brandlogos/honda.png") },
+  { id: 6, name: "Nissan", logo: require("../../assets/brandlogos/nissan.png") },
+  { id: 7, name: "Ford", logo: require("../../assets/brandlogos/ford.png") },
+  { id: 8, name: "Hyundai", logo: require("../../assets/brandlogos/hyundai.png") },
 ]
 
 export default function SearchScreen() {
@@ -50,7 +50,7 @@ export default function SearchScreen() {
       style={[styles.brandCard, selectedBrand === item.name && styles.selectedBrandCard]}
       onPress={() => handleBrandSelect(item.name)}
     >
-      <Text style={styles.brandLogo}>{item.logo}</Text>
+      <Image source={item.logo} style={styles.brandLogoImg} resizeMode="contain" />
       <Text style={[styles.brandName, selectedBrand === item.name && styles.selectedBrandName]}>{item.name}</Text>
     </TouchableOpacity>
   )
@@ -230,15 +230,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: 5,
-    borderWidth: 2,
+    borderWidth: 1,           // 1px for consistency
     borderColor: "transparent",
   },
   selectedBrandCard: {
     backgroundColor: "#e3f2fd",
-    borderColor: "#4169e1",
+    borderColor: "#4169e1", // blue
+    borderWidth: 1,         // 1px solid
   },
-  brandLogo: {
-    fontSize: 24,
+  brandLogoImg: {
+    width: 36,
+    height: 36,
     marginBottom: 8,
   },
   brandName: {

@@ -186,12 +186,20 @@ const styles = StyleSheet.create({
     backgroundColor: "#ededed",
   },
   header: {
-    backgroundColor: "#1054CF",
+    // backgroundColor: "#1054CF", // Remove or comment out this line
+    backgroundColor: "transparent", // Add this line
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#000000", // white for contrast
   },
   adminButton: {
     flexDirection: "row",

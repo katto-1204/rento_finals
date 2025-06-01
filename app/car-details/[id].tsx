@@ -1,14 +1,31 @@
 "use client"
 
-import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from "react-native"
+import { useState, useEffect } from "react"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, TextInput, ActivityIndicator, Alert } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router, useLocalSearchParams } from "expo-router"
 import { cars } from "../../data/cars"
+import { db } from "../../config/firebase"
+import { collection, addDoc, query, where, orderBy, onSnapshot, serverTimestamp } from "firebase/firestore"
+import { useAuth } from "../../hooks/useAuth"
+
+type User = {
+  id: string;
+  email: string;
+}
+
+type Review = {
+  id: string;
+  carId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: any; // Using 'any' for Firestore Timestamp
+}
 
 const { width } = Dimensions.get("window")
-
 
 const carSpecs = [
   { icon: "speedometer", label: "Mileage", value: "25,000 km" },
@@ -23,6 +40,73 @@ export default function CarDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const car = cars.find(car => car.id === id)
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  // Review state
+  const { user } = useAuth()
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [reviewLoading, setReviewLoading] = useState(true)
+  const [reviewText, setReviewText] = useState("")
+  const [reviewRating, setReviewRating] = useState(5)
+  const [submitting, setSubmitting] = useState(false)
+
+  // Fetch reviews for this car
+  useEffect(() => {
+    if (!id) return
+    
+    setReviewLoading(true)
+    const reviewsRef = collection(db, "reviews")
+    const q = query(
+      reviewsRef,
+      where("carId", "==", id),
+      orderBy("createdAt", "desc")
+    )
+
+    const unsub = onSnapshot(q, (snapshot) => {
+      const reviewsData: Review[] = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+      } as Review))
+      setReviews(reviewsData)
+      setReviewLoading(false)
+    }, (error) => {
+      console.error("Error fetching reviews: ", error)
+      setReviewLoading(false)
+    })
+
+    return () => unsub()
+  }, [id])
+
+  // Submit review
+  const handleSubmitReview = async () => {
+    if (!user) {
+      Alert.alert("Please log in to leave a review.")
+      return
+    }
+    if (!reviewText.trim()) {
+      Alert.alert("Please enter your review.")
+      return
+    }
+    setSubmitting(true)
+    try {
+      console.log("Submitting review for car:", id)
+      const docRef = await addDoc(collection(db, "reviews"), {
+        carId: id,
+        userId: user.id,
+        userName: user.email || "Anonymous", // just use email since we know it exists
+        rating: reviewRating,
+        comment: reviewText,
+        createdAt: serverTimestamp(),
+      })
+      console.log("Review added with ID:", docRef.id)
+      
+      setReviewText("")
+      setReviewRating(5)
+    } catch (e) {
+      console.error("Error adding review:", e)
+      Alert.alert("Error", "Failed to submit review.")
+    }
+    setSubmitting(false)
+  }
 
   if (!car) {
     return (
@@ -90,6 +174,71 @@ export default function CarDetailsScreen() {
               </View>
             ))}
           </View>
+        </View>
+
+        {/* --- Reviews Section --- */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Reviews</Text>
+          {reviewLoading ? (
+            <ActivityIndicator />
+          ) : reviews.length === 0 ? (
+            <Text style={{ color: "#666", marginBottom: 16 }}>No reviews yet.</Text>
+          ) : (
+            reviews.map((review) => (
+              <View key={review.id} style={styles.reviewCard}>
+                <View style={styles.reviewHeader}>
+                  <Text style={styles.reviewUserName}>{review.userName}</Text>
+                  <View style={styles.reviewRating}>
+                    <Ionicons name="star" size={16} color="#FFD700" />
+                    <Text style={{ marginLeft: 4 }}>{review.rating}</Text>
+                  </View>
+                </View>
+                <Text style={styles.reviewComment}>{review.comment}</Text>
+                <Text style={styles.reviewDate}>
+                  {review.createdAt?.toDate
+                    ? review.createdAt.toDate().toLocaleString()
+                    : ""}
+                </Text>
+              </View>
+            ))
+          )}
+
+          {/* --- Leave a Review Form --- */}
+          {user && (
+            <View style={styles.reviewForm}>
+              <Text style={styles.reviewFormTitle}>Leave a Review</Text>
+              <View style={styles.ratingContainer}>
+                <Text style={styles.ratingLabel}>Rating:</Text>
+                <View style={styles.ratingStars}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <TouchableOpacity key={star} onPress={() => setReviewRating(star)}>
+                      <Ionicons
+                        name={reviewRating >= star ? "star" : "star-outline"}
+                        size={28}
+                        color="#FFD700"
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              <TextInput
+                style={styles.reviewInput}
+                placeholder="Write your review..."
+                value={reviewText}
+                onChangeText={setReviewText}
+                multiline
+              />
+              <TouchableOpacity
+                style={[styles.submitButton, submitting && { opacity: 0.6 }]}
+                onPress={handleSubmitReview}
+                disabled={submitting}
+              >
+                <Text style={styles.submitButtonText}>
+                  {submitting ? "Submitting..." : "Submit Review"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </ScrollView>
 

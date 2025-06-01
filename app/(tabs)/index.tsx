@@ -491,7 +491,7 @@ const styles = StyleSheet.create({
   },
   couponCard: {
     width: width - 40,
-    height: 120,
+    height: 200, // doubled from 120 to 240
     borderRadius: 12,
     overflow: 'hidden',
     marginRight: 10,

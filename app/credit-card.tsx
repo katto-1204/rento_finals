@@ -266,12 +266,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   chip: {
-    width: 56,      // was 40
-    height: 36,     // was 24
+    width: 40,
+    height: 24,
   },
   cardLogoLarge: {
-    width: 100,     // was 80
-    height: 56,     // was 40
+    width: 80,
+    height: 40,
   },
   cardNumber: {
     color: COLORS.white,
@@ -336,17 +336,16 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
-    gap: 16,
   },
   halfInput: {
     flex: 1,
   },
   expiryInput: {
-    flex: 0.8,
+    flex: 0.7,      // less than 1, so it's shorter
     marginRight: 8,
   },
   cvvInput: {
-    flex: 1,
+    flex: 1.3,      // more than 1, so it's wider
   },
   payButton: {
     backgroundColor: COLORS.primary,
