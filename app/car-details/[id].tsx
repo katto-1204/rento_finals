@@ -36,6 +36,11 @@ const carSpecs = [
   { icon: "shield-checkmark", label: "Insurance", value: "Included" },
 ]
 
+const formatUserName = (email: string) => {
+  const name = email.split('@')[0]
+  return name.charAt(0).toUpperCase() + name.slice(1)
+}
+
 export default function CarDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const car = cars.find(car => car.id === id)
@@ -78,8 +83,8 @@ export default function CarDetailsScreen() {
 
   // Submit review
   const handleSubmitReview = async () => {
-    if (!user) {
-      Alert.alert("Please log in to leave a review.")
+    if (!user || !user.email) {
+      Alert.alert("Error", "Please log in with an email to leave a review.")
       return
     }
     if (!reviewText.trim()) {
@@ -92,7 +97,7 @@ export default function CarDetailsScreen() {
       const docRef = await addDoc(collection(db, "reviews"), {
         carId: id,
         userId: user.id,
-        userName: user.email || "Anonymous", // just use email since we know it exists
+        userName: user.email, // Always use email, never "Anonymous"
         rating: reviewRating,
         comment: reviewText,
         createdAt: serverTimestamp(),
@@ -187,10 +192,21 @@ export default function CarDetailsScreen() {
             reviews.map((review) => (
               <View key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
-                  <Text style={styles.reviewUserName}>{review.userName}</Text>
-                  <View style={styles.reviewRating}>
-                    <Ionicons name="star" size={16} color="#FFD700" />
-                    <Text style={{ marginLeft: 4 }}>{review.rating}</Text>
+                  <View style={styles.userInfo}>
+                    <Text style={styles.reviewUserName}>
+                      {formatUserName(review.userName)}
+                    </Text>
+                    <Text style={styles.reviewEmail}>{review.userName}</Text>
+                  </View>
+                  <View style={styles.ratingContainer}>
+                    {[...Array(review.rating)].map((_, index) => (
+                      <Ionicons 
+                        key={index} 
+                        name="star" 
+                        size={16} 
+                        color="#FFD700" 
+                      />
+                    ))}
                   </View>
                 </View>
                 <Text style={styles.reviewComment}>{review.comment}</Text>
@@ -207,7 +223,7 @@ export default function CarDetailsScreen() {
           {user && (
             <View style={styles.reviewForm}>
               <Text style={styles.reviewFormTitle}>Leave a Review</Text>
-              <View style={styles.ratingContainer}>
+              <View style={styles.ratingInputContainer}>
                 <Text style={styles.ratingLabel}>Rating:</Text>
                 <View style={styles.ratingStars}>
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -418,7 +434,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     marginBottom: 16,
   },
-  ratingContainer: {
+  ratingInputContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
@@ -473,46 +489,49 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   reviewCard: {
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
   },
   reviewHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 8,
+    marginBottom: 12,
+  },
+  userInfo: {
+    flex: 1,
   },
   reviewUserName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#000000",
-    marginBottom: 4,
   },
-  reviewRating: {
+  reviewEmail: {
+    fontSize: 14,
+    color: "#666666",
+    marginTop: 2,
+  },
+  ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+  },
+  reviewComment: {
+    fontSize: 15,
+    color: "#333333",
+    lineHeight: 22,
+    marginBottom: 8,
   },
   reviewDate: {
     fontSize: 12,
-    color: "#666666",
-  },
-  reviewComment: {
-    fontSize: 14,
-    color: "#333333",
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  reviewImages: {
-    flexDirection: "row",
-    gap: 8,
-  },
-  reviewImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
+    color: "#999999",
+    marginTop: 4,
   },
   bookingContainer: {
     padding: 20,
