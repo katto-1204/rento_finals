@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   View,
   Text,
@@ -35,13 +35,36 @@ export default function SearchScreen() {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [filteredCars, setFilteredCars] = useState(cars)
 
+  useEffect(() => {
+    let filtered = [...cars]; // Create a copy of all cars
+
+    // Apply search filter if there's a search query
+    if (searchQuery) {
+      filtered = filtered.filter((car) => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          car.name.toLowerCase().includes(searchLower) ||
+          car.brand.toLowerCase().includes(searchLower) ||
+          car.model.toLowerCase().includes(searchLower)
+        );
+      });
+    }
+
+    // Apply brand filter if a brand is selected
+    if (selectedBrand) {
+      filtered = filtered.filter((car) => car.brand === selectedBrand);
+    }
+
+    setFilteredCars(filtered);
+  }, [searchQuery, selectedBrand])
+
   const handleBrandSelect = (brandName: string) => {
     if (selectedBrand === brandName) {
-      setSelectedBrand(null)
-      setFilteredCars(cars)
+      // If clicking the same brand, clear the filter
+      setSelectedBrand(null);
     } else {
-      setSelectedBrand(brandName)
-      setFilteredCars(cars.filter((car) => car.brand === brandName))
+      // Select the new brand
+      setSelectedBrand(brandName);
     }
   }
 
@@ -67,7 +90,7 @@ export default function SearchScreen() {
       <Image source={{ uri: item.image }} style={styles.carImage} />
       <View style={styles.carInfo}>
         <Text style={styles.carName}>{item.name}</Text>
-        <Text style={styles.carPrice}>{item.price}</Text>
+        <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
         <View style={styles.carDetails}>
           <Text style={styles.carBrand}>{item.brand}</Text>
           <Text style={styles.carLocation}>{item.location}</Text>
