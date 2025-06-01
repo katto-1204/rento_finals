@@ -225,7 +225,7 @@ export default function PaymentScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     flexDirection: "row",
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",

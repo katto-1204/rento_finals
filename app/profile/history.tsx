@@ -205,7 +205,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     flexDirection: "row",
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#4169e1",
+    color: "#1054CF",
     marginBottom: 4,
   },
   statLabel: {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   activeFilterTab: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF",
   },
   filterText: {
     fontSize: 14,
@@ -373,5 +373,8 @@ const styles = StyleSheet.create({
   ratingContainer: {
     flexDirection: "row",
     gap: 2,
+  },
+  ratingStars: {
+    color: "#FFB700",
   },
 })

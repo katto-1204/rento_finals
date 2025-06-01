@@ -6,6 +6,16 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 
+const COLORS = {
+  background: "#ededed",
+  primary: "#1054CF", // Blue
+  secondary: "#FFB700", // Yellow
+  white: "#ffffff",
+  black: "#000000",
+  gray: "#666666",
+  lightGray: "#e0e0e0",
+}
+
 const addOns = [
   { id: 1, name: "GPS Navigation", price: 10, selected: false },
   { id: 2, name: "Child Seat", price: 15, selected: false },
@@ -79,7 +89,7 @@ export default function CheckoutScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Pickup Date & Time</Text>
             <TouchableOpacity style={styles.dateInput}>
-              <Ionicons name="calendar" size={20} color="#4169e1" />
+              <Ionicons name="calendar" size={20} color={COLORS.primary} />
               <Text style={styles.dateText}>{pickupDate}</Text>
             </TouchableOpacity>
           </View>
@@ -87,7 +97,7 @@ export default function CheckoutScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Drop-off Date & Time</Text>
             <TouchableOpacity style={styles.dateInput}>
-              <Ionicons name="calendar" size={20} color="#4169e1" />
+              <Ionicons name="calendar" size={20} color={COLORS.primary} />
               <Text style={styles.dateText}>{dropoffDate}</Text>
             </TouchableOpacity>
           </View>
@@ -95,7 +105,7 @@ export default function CheckoutScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Pickup Location</Text>
             <TouchableOpacity style={styles.locationInput}>
-              <Ionicons name="location" size={20} color="#4169e1" />
+              <Ionicons name="location" size={20} color={COLORS.primary} />
               <Text style={styles.locationText}>{pickupLocation}</Text>
               <Ionicons name="chevron-down" size={20} color="#666666" />
             </TouchableOpacity>
@@ -179,7 +189,7 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: "row",
@@ -188,12 +198,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: COLORS.lightGray,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000000",
+    color: COLORS.black,
   },
   content: {
     flex: 1,
@@ -206,7 +216,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000000",
+    color: COLORS.black,
     marginBottom: 16,
   },
   carSummary: {
@@ -220,12 +230,12 @@ const styles = StyleSheet.create({
   carName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#000000",
+    color: COLORS.black,
   },
   carPrice: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#4169e1",
+    color: COLORS.primary,
   },
   inputGroup: {
     marginBottom: 16,
@@ -243,12 +253,12 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: COLORS.lightGray,
   },
   dateText: {
     marginLeft: 12,
     fontSize: 16,
-    color: "#000000",
+    color: COLORS.black,
   },
   locationInput: {
     flexDirection: "row",
@@ -386,13 +396,13 @@ const styles = StyleSheet.create({
     borderTopColor: "#e0e0e0",
   },
   confirmButton: {
-    backgroundColor: "#c2a300",
+    backgroundColor: COLORS.secondary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
   },
   confirmButtonText: {
-    color: "#ffffff",
+    color: COLORS.white,
     fontSize: 18,
     fontWeight: "600",
   },

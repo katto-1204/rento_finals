@@ -116,10 +116,15 @@ export default function DevelopersScreen() {
   )
 }
 
+const COLORS = {
+  primary: "#4169e1",
+  background: "#ffffff",
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: "row",
@@ -201,8 +206,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   developerEmail: {
+    color: COLORS.primary,
     fontSize: 14,
-    color: "#4169e1",
     marginLeft: 6,
   },
   aboutSection: {
@@ -238,7 +243,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   techItem: {
-    backgroundColor: "#4169e1",
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -267,7 +272,7 @@ const styles = StyleSheet.create({
   contactButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#4169e1",
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,

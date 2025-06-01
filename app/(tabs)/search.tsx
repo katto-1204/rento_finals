@@ -154,7 +154,7 @@ export default function SearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     paddingHorizontal: 20,
@@ -330,5 +330,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999999",
     marginRight: 6,
+  },
+  button: {
+    backgroundColor: "#1054CF",
+  },
+  activeText: {
+    color: "#FFB700",
   },
 })

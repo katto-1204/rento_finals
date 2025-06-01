@@ -147,7 +147,7 @@ export default function PersonalInfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     flexDirection: "row",
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   },
   editText: {
     fontSize: 16,
-    color: "#4169e1",
+    color: "#1054CF",
     fontWeight: "600",
   },
   content: {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   saveButton: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",

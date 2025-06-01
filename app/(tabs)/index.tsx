@@ -165,6 +165,7 @@ export default function HomeScreen() {
     }
   }, [])
 
+  // Update the renderCarCard function
   const renderCarCard = ({ item }: { item: Car }) => (
     <TouchableOpacity
       style={styles.carCard}
@@ -177,13 +178,35 @@ export default function HomeScreen() {
       <Image source={{ uri: item.image }} style={styles.carImage} />
       <View style={styles.carInfo}>
         <Text style={styles.carName}>{item.name}</Text>
-        <Text style={styles.carPrice}>{item.pricePerDay}</Text>
-        <View style={styles.carLocation}>
-          <Text style={styles.carBrand}>{item.brand}</Text>
-          <Text style={styles.locationText}>{item.location}</Text>
+        <Text style={styles.carBrand}>{item.brand}</Text>
+        <View style={styles.ratingContainer}>
+          {[...Array(5)].map((_, index) => (
+            <Ionicons
+              key={index}
+              name="star"
+              size={16}
+              color={index < Math.floor(item.rating) ? "#FFB700" : "#e0e0e0"}
+            />
+          ))}
+          <Text style={styles.ratingText}>{item.rating}</Text>
+        </View>
+        <View style={styles.carDetails}>
+          <View style={styles.seatsContainer}>
+            <Ionicons name="people" size={16} color="#ffffff" />
+            <Text style={styles.seatsText}>{item.seats} Seats</Text>
+          </View>
+          <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#4169e1" />
+      <TouchableOpacity 
+        style={styles.arrowButton}
+        onPress={() => router.push({
+          pathname: "/car-details/[id]",
+          params: { id: item.id }
+        })}
+      >
+        <Ionicons name="arrow-forward" size={24} color="#FFB700" />
+      </TouchableOpacity>
     </TouchableOpacity>
   )
 
@@ -286,7 +309,7 @@ export default function HomeScreen() {
                   style={styles.dateTimeInput}
                   onPress={() => showDateTimePicker('date', 'pickUp')}
                 >
-                  <Ionicons name="calendar" size={20} color="#4169e1" />
+                  <Ionicons name="calendar" size={20} color="#1054CF" />
                   <Text style={styles.dateTimeText}>
                     {formData.pickUpDate.toLocaleDateString()}
                   </Text>
@@ -295,7 +318,7 @@ export default function HomeScreen() {
                   style={styles.dateTimeInput}
                   onPress={() => showDateTimePicker('time', 'pickUp')}
                 >
-                  <Ionicons name="time" size={20} color="#4169e1" />
+                  <Ionicons name="time" size={20} color="#1054CF" />
                   <Text style={styles.dateTimeText}>
                     {formData.pickUpTime.toLocaleTimeString()}
                   </Text>
@@ -311,7 +334,7 @@ export default function HomeScreen() {
                   style={styles.dateTimeInput}
                   onPress={() => showDateTimePicker('date', 'dropOff')}
                 >
-                  <Ionicons name="calendar" size={20} color="#4169e1" />
+                  <Ionicons name="calendar" size={20} color="#1054CF" />
                   <Text style={styles.dateTimeText}>
                     {formData.dropOffDate.toLocaleDateString()}
                   </Text>
@@ -320,7 +343,7 @@ export default function HomeScreen() {
                   style={styles.dateTimeInput}
                   onPress={() => showDateTimePicker('time', 'dropOff')}
                 >
-                  <Ionicons name="time" size={20} color="#4169e1" />
+                  <Ionicons name="time" size={20} color="#1054CF" />
                   <Text style={styles.dateTimeText}>
                     {formData.dropOffTime.toLocaleTimeString()}
                   </Text>
@@ -349,7 +372,7 @@ export default function HomeScreen() {
           )}
 
           <TouchableOpacity 
-            style={[styles.findCarsButton, { backgroundColor: isRental ? '#4169e1' : '#c2a300' }]} 
+            style={[styles.findCarsButton, { backgroundColor: isRental ? '#1054CF' : '#FFB700' }]} 
             onPress={() => router.push("/(tabs)/search")}
           >
             <Text style={styles.findCarsButtonText}>Find Cars</Text>
@@ -417,7 +440,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     flexDirection: "row",
@@ -447,7 +470,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   devsButton: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF", // Updated blue
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
@@ -496,7 +519,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   activeIndicator: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF", // Updated blue
     width: 24,
   },
   inactiveIndicator: {
@@ -524,10 +547,10 @@ const styles = StyleSheet.create({
     margin: 4,
   },
   activeRentalTab: {
-    backgroundColor: "#4169e1",
+    backgroundColor: "#1054CF", // Updated blue
   },
   activeAirportTab: {
-    backgroundColor: "#c2a300",
+    backgroundColor: "#FFB700", // Updated from #c2a300
   },
   activeRentalText: {
     color: "#ffffff",
@@ -574,6 +597,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     marginTop: 10,
+    backgroundColor: "#1054CF", // Updated blue
   },
   section: {
     paddingHorizontal: 20,
@@ -592,13 +616,13 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   viewAllText: {
-    color: "#4169e1",
+    color: "#1054CF", // Updated blue
     fontSize: 14,
     fontWeight: "600",
   },
   carCard: {
     flexDirection: "row",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1054CF", // Updated blue
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -624,26 +648,51 @@ const styles = StyleSheet.create({
   carName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000000",
+    color: "#ffffff",
     marginBottom: 4,
+  },
+  carBrand: {
+    fontSize: 14,
+    color: "#ffffff",
+    marginBottom: 8,
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  ratingText: {
+    marginLeft: 4,
+    color: "#ffffff",
+    fontSize: 14,
+  },
+  carDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  seatsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  seatsText: {
+    color: "#ffffff",
+    marginLeft: 4,
+    fontSize: 14,
   },
   carPrice: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#4169e1",
-    marginBottom: 4,
+    color: "#FFB700",
   },
-  carLocation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-  carBrand: {
-    fontSize: 14,
-    color: "#666666",
-  },
-  locationText: {
-    fontSize: 14,
-    color: "#666666",
+  arrowButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 12,
   },
   horizontalCarCard: {
     width: 150,
@@ -675,7 +724,7 @@ const styles = StyleSheet.create({
   horizontalCarPrice: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#4169e1",
+    color: "#1054CF", // Updated blue
   },
   tabText: {
     fontSize: 14,

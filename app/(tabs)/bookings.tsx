@@ -71,44 +71,106 @@ export default function BookingsScreen() {
     }
   }
 
-  const renderBookingCard = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.bookingCard}>
-      <Image source={{ uri: item.carImage }} style={styles.carImage} />
-      <View style={styles.bookingInfo}>
-        <View style={styles.bookingHeader}>
-          <Text style={styles.carName}>{item.carName}</Text>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-            <Text style={styles.statusText}>{item.status}</Text>
+  // Update the renderBookingCard function to handle conditional styling
+  const renderBookingCard = ({ item }: { item: any }) => {
+    const isPastBooking = item.status === "Completed"
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.bookingCard,
+          { backgroundColor: isPastBooking ? "#ffffff" : "#1054CF" },
+        ]}
+      >
+        <Image source={{ uri: item.carImage }} style={styles.carImage} />
+        <View style={styles.bookingInfo}>
+          <View style={styles.bookingHeader}>
+            <Text
+              style={[
+                styles.carName,
+                { color: isPastBooking ? "#000000" : "#ffffff" },
+              ]}
+            >
+              {item.carName}
+            </Text>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: getStatusColor(item.status) },
+              ]}
+            >
+              <Text style={styles.statusText}>{item.status}</Text>
+            </View>
           </View>
+          <Text
+            style={[
+              styles.price,
+              { color: isPastBooking ? "#1054CF" : "#FFB700" },
+            ]}
+          >
+            {item.price}
+          </Text>
+          <View style={styles.dateContainer}>
+            <View style={styles.dateItem}>
+              <Ionicons
+                name="calendar"
+                size={16}
+                color={isPastBooking ? "#666666" : "#ffffff"}
+              />
+              <Text
+                style={[
+                  styles.dateText,
+                  { color: isPastBooking ? "#666666" : "#ffffff" },
+                ]}
+              >
+                Pickup: {item.pickupDate}
+              </Text>
+            </View>
+            <View style={styles.dateItem}>
+              <Ionicons
+                name="calendar"
+                size={16}
+                color={isPastBooking ? "#666666" : "#ffffff"}
+              />
+              <Text
+                style={[
+                  styles.dateText,
+                  { color: isPastBooking ? "#666666" : "#ffffff" },
+                ]}
+              >
+                Drop-off: {item.dropoffDate}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.locationContainer}>
+            <Ionicons
+              name="location"
+              size={16}
+              color={isPastBooking ? "#666666" : "#ffffff"}
+            />
+            <Text
+              style={[
+                styles.locationText,
+                { color: isPastBooking ? "#666666" : "#ffffff" },
+              ]}
+            >
+              {item.location}
+            </Text>
+          </View>
+          {item.status !== "Completed" && (
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.modifyButton}>
+                <Text style={styles.modifyButtonText}>Modify</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.cancelButton}>
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-        <Text style={styles.price}>{item.price}</Text>
-        <View style={styles.dateContainer}>
-          <View style={styles.dateItem}>
-            <Ionicons name="calendar" size={16} color="#666666" />
-            <Text style={styles.dateText}>Pickup: {item.pickupDate}</Text>
-          </View>
-          <View style={styles.dateItem}>
-            <Ionicons name="calendar" size={16} color="#666666" />
-            <Text style={styles.dateText}>Drop-off: {item.dropoffDate}</Text>
-          </View>
-        </View>
-        <View style={styles.locationContainer}>
-          <Ionicons name="location" size={16} color="#666666" />
-          <Text style={styles.locationText}>{item.location}</Text>
-        </View>
-        {item.status !== "Completed" && (
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.modifyButton}>
-              <Text style={styles.modifyButtonText}>Modify</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </TouchableOpacity>
-  )
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -122,13 +184,24 @@ export default function BookingsScreen() {
           style={[styles.tab, activeTab === "current" && styles.activeTab]}
           onPress={() => setActiveTab("current")}
         >
-          <Text style={[styles.tabText, activeTab === "current" && styles.activeTabText]}>Current & Upcoming</Text>
+          <Text
+            style={[
+              styles.tabText,
+              activeTab === "current" && styles.activeTabText,
+            ]}
+          >
+            Current & Upcoming
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.tab, activeTab === "past" && styles.activeTab]}
           onPress={() => setActiveTab("past")}
         >
-          <Text style={[styles.tabText, activeTab === "past" && styles.activeTabText]}>Past Bookings</Text>
+          <Text
+            style={[styles.tabText, activeTab === "past" && styles.activeTabText]}
+          >
+            Past Bookings
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -159,7 +232,7 @@ export default function BookingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     paddingHorizontal: 20,
@@ -204,7 +277,6 @@ const styles = StyleSheet.create({
   },
   bookingCard: {
     flexDirection: "row",
-    backgroundColor: "#ffffff",
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -216,8 +288,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
   },
   carImage: {
     width: 100,
@@ -237,7 +307,6 @@ const styles = StyleSheet.create({
   carName: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#000000",
     flex: 1,
   },
   statusBadge: {
@@ -245,6 +314,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 12,
     marginLeft: 8,
+    backgroundColor: "#FFB700",
   },
   statusText: {
     fontSize: 12,
@@ -254,7 +324,6 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#4169e1",
     marginBottom: 12,
   },
   dateContainer: {
@@ -267,7 +336,6 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 14,
-    color: "#666666",
     marginLeft: 8,
   },
   locationContainer: {
@@ -277,7 +345,6 @@ const styles = StyleSheet.create({
   },
   locationText: {
     fontSize: 14,
-    color: "#666666",
     marginLeft: 8,
   },
   actionButtons: {
@@ -286,7 +353,7 @@ const styles = StyleSheet.create({
   },
   modifyButton: {
     flex: 1,
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#FFB700",
     paddingVertical: 8,
     borderRadius: 6,
     alignItems: "center",

@@ -118,7 +118,7 @@ export default function CarDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#ededed",
   },
   header: {
     flexDirection: "row",
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   carPrice: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#4169e1",
+    color: "#1054CF",
   },
   availabilityContainer: {
     flexDirection: "row",
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   specItem: {
     width: "48%",
     alignItems: "center",
-    backgroundColor: "#f8f9fa",
+    backgroundColor: "#ffffff",
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     borderTopColor: "#e0e0e0",
   },
   bookNowButton: {
-    backgroundColor: "#c2a300",
+    backgroundColor: "#FFB700",
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
