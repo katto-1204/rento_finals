@@ -279,117 +279,62 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* Rental Form */}
-        <View style={styles.rentalForm}>
-          <View style={styles.rentalTabs}>
+        {/* Top Car Brands Section */}
+        <View style={styles.brandsSection}>
+          <Text style={styles.sectionTitle}>Top Car Brands</Text>
+          <Text style={styles.sectionSubtitle}>Browse cars in the following brands:</Text>
+
+          <View style={styles.brandsGrid}>
             <TouchableOpacity 
-              style={[
-                styles.rentalTab, 
-                isRental && styles.activeRentalTab
-              ]}
-              onPress={() => setIsRental(true)}
+              style={styles.brandCard}
+              onPress={() => router.push({
+                pathname: "/(tabs)/search",
+                params: { brand: "Toyota" }
+              })}
             >
-              <Text style={[styles.tabText, isRental && styles.activeRentalText]}>RENTAL</Text>
+              <Image 
+                source={require("../../assets/brandlogos/toyota.png")}
+                style={styles.brandLogo}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
+
             <TouchableOpacity 
-              style={[
-                styles.rentalTab, 
-                !isRental && styles.activeAirportTab
-              ]}
-              onPress={() => setIsRental(false)}
+              style={styles.brandCard}
+              onPress={() => router.push({
+                pathname: "/(tabs)/search",
+                params: { brand: "BMW" }
+              })}
             >
-              <Text style={[styles.tabText, !isRental && styles.activeAirportText]}>AIRPORT PICKUP</Text>
+              <Image 
+                source={require("../../assets/brandlogos/bmw.png")}
+                style={styles.brandLogo}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.brandCard}
+              onPress={() => router.push({
+                pathname: "/(tabs)/search",
+                params: { brand: "Mercedes" }
+              })}
+            >
+              <Image 
+                source={require("../../assets/brandlogos/mercedes.png")}
+                style={styles.brandLogo}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.brandCard}
+              onPress={() => router.push("/(tabs)/search")}
+            >
+              <Ionicons name="arrow-forward" size={24} color="#4169e1" />
+              <Text style={styles.moreText}>More</Text>
             </TouchableOpacity>
           </View>
-
-          {isRental ? (
-            <View style={styles.formContainer}>
-              <View style={styles.dateLocationContainer}>
-                <TouchableOpacity 
-                  style={styles.dateTimeInput}
-                  onPress={() => showDateTimePicker('date', 'pickUp')}
-                >
-                  <Ionicons name="calendar" size={20} color="#1054CF" />
-                  <Text style={styles.dateTimeText}>
-                    {formData.pickUpDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.dateTimeInput}
-                  onPress={() => showDateTimePicker('time', 'pickUp')}
-                >
-                  <Ionicons name="time" size={20} color="#1054CF" />
-                  <Text style={styles.dateTimeText}>
-                    {formData.pickUpTime.toLocaleTimeString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.locationInput}>
-                  <Ionicons name="location" size={20} color="#4169e1" />
-                  <Text style={styles.dateTimeText}>Pick-up Location</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.dateLocationContainer}>
-                <TouchableOpacity 
-                  style={styles.dateTimeInput}
-                  onPress={() => showDateTimePicker('date', 'dropOff')}
-                >
-                  <Ionicons name="calendar" size={20} color="#1054CF" />
-                  <Text style={styles.dateTimeText}>
-                    {formData.dropOffDate.toLocaleDateString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={styles.dateTimeInput}
-                  onPress={() => showDateTimePicker('time', 'dropOff')}
-                >
-                  <Ionicons name="time" size={20} color="#1054CF" />
-                  <Text style={styles.dateTimeText}>
-                    {formData.dropOffTime.toLocaleTimeString()}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.locationInput}>
-                  <Ionicons name="location" size={20} color="#4169e1" />
-                  <Text style={styles.dateTimeText}>Drop-off Location</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View style={styles.formContainer}>
-              <TouchableOpacity style={styles.airportInput}>
-                <Ionicons name="airplane" size={20} color="#c2a300" />
-                <Text style={styles.dateTimeText}>Flight Number</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.airportInput}>
-                <Ionicons name="business" size={20} color="#c2a300" />
-                <Text style={styles.dateTimeText}>Airline</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.airportInput}>
-                <Ionicons name="terminal" size={20} color="#c2a300" />
-                <Text style={styles.dateTimeText}>Terminal</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          <TouchableOpacity 
-            style={[styles.findCarsButton, { backgroundColor: isRental ? '#1054CF' : '#FFB700' }]} 
-            onPress={() => router.push("/(tabs)/search")}
-          >
-            <Text style={styles.findCarsButtonText}>Find Cars</Text>
-          </TouchableOpacity>
-
-          {showPicker && (
-            <DateTimePicker
-              value={activeField === 'pickUp' ? 
-                (pickerMode === 'date' ? formData.pickUpDate : formData.pickUpTime) :
-                (pickerMode === 'date' ? formData.dropOffDate : formData.dropOffTime)
-              }
-              mode={pickerMode}
-              is24Hour={true}
-              display="default"
-              onChange={onDateTimeChange}
-            />
-          )}
         </View>
 
         {/* Featured Cars */}
@@ -525,79 +470,52 @@ const styles = StyleSheet.create({
   inactiveIndicator: {
     backgroundColor: "#e0e0e0",
   },
-  rentalForm: {
-    backgroundColor: "#f8f9fa",
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 20,
+  brandsSection: {
+    paddingHorizontal: 20,
     marginBottom: 30,
   },
-  rentalTabs: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
-    borderRadius: 8,
-    padding: 4,
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000000",
+    marginBottom: 15,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: "#666666",
     marginBottom: 20,
   },
-  rentalTab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: "center",
-    borderRadius: 25,
-    margin: 4,
+  brandsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: -5, // Compensate for the padding in brandCard
   },
-  activeRentalTab: {
-    backgroundColor: "#1054CF", // Updated blue
-  },
-  activeAirportTab: {
-    backgroundColor: "#FFB700", // Updated from #c2a300
-  },
-  activeRentalText: {
-    color: "#ffffff",
-  },
-  activeAirportText: {
-    color: "#ffffff",
-  },
-  formContainer: {
-    gap: 15,
-    marginVertical: 20,
-  },
-  dateLocationContainer: {
-    gap: 10,
-  },
-  dateTimeInput: {
-    flexDirection: "row",
-    alignItems: "center",
+  brandCard: {
+    width: (width - 60) / 4, // Divide by 4 instead of 2
+    aspectRatio: 1,
     backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-  },
-  locationInput: {
-    flexDirection: "row",
+    borderRadius: 16,
     alignItems: "center",
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+    justifyContent: "center",
+    marginHorizontal: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
-  airportInput: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#ffffff",
-    padding: 16,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
+  brandLogo: {
+    width: "70%",
+    height: "70%",
   },
-  findCarsButton: {
-    paddingVertical: 16,
-    borderRadius: 25,
-    alignItems: "center",
-    marginTop: 10,
-    backgroundColor: "#1054CF", // Updated blue
+  moreText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4169e1",
   },
   section: {
     paddingHorizontal: 20,
@@ -607,12 +525,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#000000",
     marginBottom: 15,
   },
   viewAllText: {
