@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Image, Anim
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const COLORS = {
   background: "#FFFFFF",
@@ -26,9 +26,7 @@ export default function CreditCardScreen() {
   const [expiry, setExpiry] = useState('')
   const [cvv, setCvv] = useState('')
   const [isFlipped, setIsFlipped] = useState(false)
-
-  // Add animation value
-  const flipAnimation = new Animated.Value(0)
+  const flipAnimation = useRef(new Animated.Value(0)).current
 
   // Format card number with spaces
   const formatCardNumber = (number: string) => {
@@ -37,7 +35,7 @@ export default function CreditCardScreen() {
     return groups.join(' ')
   }
 
-  // Format displayed card number (show typed numbers + remaining bullets)
+
   const displayCardNumber = () => {
     const formatted = formatCardNumber(cardNumber)
     const remaining = 16 - cardNumber.length
@@ -46,13 +44,14 @@ export default function CreditCardScreen() {
 
   // Add flip animation function
   const flipCard = (showBack: boolean) => {
-    setIsFlipped(showBack)
+    if (showBack === isFlipped) return; // Prevent double animation
+    setIsFlipped(showBack);
     Animated.spring(flipAnimation, {
       toValue: showBack ? 180 : 0,
       friction: 8,
       tension: 10,
       useNativeDriver: true,
-    }).start()
+    }).start();
   }
 
   // Add interpolation for the flip animation
@@ -88,11 +87,18 @@ export default function CreditCardScreen() {
         <View style={styles.cardContainer}>
           {/* Front of card */}
           <Animated.View style={[styles.cardPreview, frontAnimatedStyle]}>
-            <Image 
-              source={require('../assets/creditcard-logo.png')}
-              style={styles.cardLogo}
-              resizeMode="contain"
-            />
+            <View style={styles.cardTopRow}>
+              <Image
+                source={require('../assets/card-chip.png')}
+                style={styles.chip}
+                resizeMode="contain"
+              />
+              <Image
+                source={require('../assets/creditcard-logo.png')}
+                style={styles.cardLogoLarge}
+                resizeMode="contain"
+              />
+            </View>
             <Text style={styles.cardNumber}>
               {formatCardNumber(displayCardNumber())}
             </Text>
@@ -115,10 +121,12 @@ export default function CreditCardScreen() {
           {/* Back of card */}
           <Animated.View style={[styles.cardPreview, styles.cardBack, backAnimatedStyle]}>
             <View style={styles.magneticStrip} />
-            <View style={styles.cvvContainer}>
-              <Text style={styles.cvvLabel}>CVV</Text>
-              <View style={styles.cvvBox}>
-                <Text style={styles.cvvText}>{cvv || '•••'}</Text>
+            <View style={styles.cvvBackRow}>
+              <View style={styles.cvvLabelBox}>
+                <Text style={styles.cvvLabelBack}>CVV</Text>
+                <View style={styles.cvvBoxBack}>
+                  <Text style={styles.cvvText}>{cvv || '•••'}</Text>
+                </View>
               </View>
             </View>
           </Animated.View>
@@ -141,13 +149,12 @@ export default function CreditCardScreen() {
           
           <View style={styles.row}>
             <TextInput 
-              style={[styles.input, styles.halfInput]}
+              style={[styles.input, styles.expiryInput]}
               placeholder="MM/YY"
               keyboardType="numeric"
               maxLength={5}
               value={expiry}
               onChangeText={(text) => {
-                // Format MM/YY as you type
                 const cleaned = text.replace(/\D/g, '')
                 if (cleaned.length >= 2) {
                   setExpiry(cleaned.slice(0, 2) + '/' + cleaned.slice(2))
@@ -157,13 +164,13 @@ export default function CreditCardScreen() {
               }}
             />
             <TextInput 
-              style={[styles.input, styles.halfInput]}
+              style={[styles.input, styles.cvvInput]}
               placeholder="CVV"
               keyboardType="numeric"
               maxLength={3}
               value={cvv}
-              onFocus={() => flipCard(true)}  // Flip to back
-              onBlur={() => flipCard(false)}  // Flip to front
+              onFocus={() => flipCard(true)}
+              onBlur={() => flipCard(false)}
               onChangeText={setCvv}
               secureTextEntry
             />
@@ -252,10 +259,19 @@ const styles = StyleSheet.create({
     height: 200,
     justifyContent: 'space-between',
   },
-  cardLogo: {
-    width: 60,
-    height: 40,
-    marginBottom: 20,
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  chip: {
+    width: 56,      // was 40
+    height: 36,     // was 24
+  },
+  cardLogoLarge: {
+    width: 100,     // was 80
+    height: 56,     // was 40
   },
   cardNumber: {
     color: COLORS.white,
@@ -325,6 +341,13 @@ const styles = StyleSheet.create({
   halfInput: {
     flex: 1,
   },
+  expiryInput: {
+    flex: 0.8,
+    marginRight: 8,
+  },
+  cvvInput: {
+    flex: 1,
+  },
   payButton: {
     backgroundColor: COLORS.primary,
     paddingVertical: 16,
@@ -380,9 +403,12 @@ const styles = StyleSheet.create({
     backfaceVisibility: 'hidden',
   },
   magneticStrip: {
-    height: 40,
+    height: 36,
     backgroundColor: '#2a2a2a',
-    marginVertical: 20,
+    borderRadius: 6,
+    marginTop: 12,
+    marginBottom: 24,
+    width: '100%',
   },
   cvvContainer: {
     padding: 20,
@@ -404,5 +430,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  cvvBackRow: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cvvLabelBox: {
+    alignItems: 'center',
+  },
+  cvvLabelBack: {
+    color: COLORS.text,
+    fontSize: 12,
+    marginBottom: 4,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  cvvBoxBack: {
+    backgroundColor: COLORS.white,
+    paddingVertical: 6,
+    paddingHorizontal: 18,
+    borderRadius: 6,
+    minWidth: 60,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
   },
 })
