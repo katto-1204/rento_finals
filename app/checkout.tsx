@@ -24,18 +24,23 @@ const addOns = [
   { id: 4, name: "WiFi Hotspot", price: 8, selected: false },
 ]
 
+// Add payment methods constant at the top with other constants
 const paymentMethods = [
-  { id: 1, type: "card", name: "Credit Card", icon: "card" },
-  { id: 2, type: "paypal", name: "PayPal", icon: "logo-paypal" },
-  { id: 3, type: "gcash", name: "GCash", icon: "phone-portrait" },
+  { id: 'credit-card', name: 'Credit Card', icon: 'card' },
+  { id: 'paypal', name: 'PayPal', icon: 'logo-paypal' },
+  { id: 'gcash', name: 'GCash', icon: 'phone-portrait' }
 ]
+
+// Add type for payment routes
+type PaymentRoute = '/credit-card' | '/paypal' | '/gcash';
 
 export default function CheckoutScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>()
   const car = cars.find(c => c.id === carId)
 
   const [selectedAddOns, setSelectedAddOns] = useState(addOns)
-  const [selectedPayment, setSelectedPayment] = useState(1)
+  // Update payment state to use string IDs
+  const [selectedPayment, setSelectedPayment] = useState<string>('credit-card')
   const [pickupDate, setPickupDate] = useState("Dec 25, 2024")
   const [dropoffDate, setDropoffDate] = useState("Dec 28, 2024")
   const [pickupLocation, setPickupLocation] = useState("Davao Airport")
@@ -61,17 +66,24 @@ export default function CheckoutScreen() {
     )
   }
 
-  const handleConfirmBooking = (car: any) => {
-    Alert.alert(
-      "Booking Confirmed!",
-      `Your ${car.name} has been booked successfully. You will receive a confirmation email shortly.`,
-      [
-        {
-          text: "OK",
-          onPress: () => router.replace("/(tabs)/bookings"),
-        },
-      ],
-    )
+  // Update handleConfirmBooking function
+  const handleConfirmBooking = () => {
+    if (!selectedPayment) {
+      Alert.alert("Error", "Please select a payment method")
+      return
+    }
+
+    // Map payment method to route with amount parameter
+    const paymentRoutes: Record<string, string> = {
+      'credit-card': `/credit-card?amount=${total.toFixed(2)}`,
+      'paypal': `/paypal?amount=${total.toFixed(2)}`,
+      'gcash': `/gcash?amount=${total.toFixed(2)}`
+    }
+
+    const route = paymentRoutes[selectedPayment]
+    if (route) {
+      router.push(route as any)
+    }
   }
 
   return (
@@ -150,14 +162,29 @@ export default function CheckoutScreen() {
           {paymentMethods.map((method) => (
             <TouchableOpacity
               key={method.id}
-              style={[styles.paymentMethod, selectedPayment === method.id && styles.selectedPaymentMethod]}
+              style={[
+                styles.paymentMethod,
+                selectedPayment === method.id && styles.selectedPaymentMethod
+              ]}
               onPress={() => setSelectedPayment(method.id)}
             >
               <View style={styles.paymentInfo}>
-                <Ionicons name={method.icon as any} size={24} color="#4169e1" />
-                <Text style={styles.paymentName}>{method.name}</Text>
+                <Ionicons 
+                  name={method.icon as any} 
+                  size={24} 
+                  color={selectedPayment === method.id ? COLORS.primary : COLORS.gray} 
+                />
+                <Text style={[
+                  styles.paymentName,
+                  selectedPayment === method.id && { color: COLORS.primary }
+                ]}>
+                  {method.name}
+                </Text>
               </View>
-              <View style={[styles.radio, selectedPayment === method.id && styles.selectedRadio]}>
+              <View style={[
+                styles.radio,
+                selectedPayment === method.id && styles.selectedRadio
+              ]}>
                 {selectedPayment === method.id && <View style={styles.radioDot} />}
               </View>
             </TouchableOpacity>
@@ -196,10 +223,10 @@ export default function CheckoutScreen() {
       <View style={styles.confirmContainer}>
         <TouchableOpacity 
           style={styles.confirmButton} 
-          onPress={() => handleConfirmBooking(car)}
+          onPress={handleConfirmBooking}
         >
           <Text style={styles.confirmButtonText}>
-            Confirm Booking - ${total.toFixed(2)}
+            Continue to Payment - ${total.toFixed(2)}
           </Text>
         </TouchableOpacity>
       </View>
@@ -349,47 +376,46 @@ const styles = StyleSheet.create({
     borderColor: "#4169e1",
   },
   paymentMethod: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: COLORS.white,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
   },
   selectedPaymentMethod: {
-    borderColor: "#4169e1",
-    backgroundColor: "#f8f9ff",
+    borderColor: COLORS.primary,
+    backgroundColor: `${COLORS.primary}10`,
   },
   paymentInfo: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   paymentName: {
-    marginLeft: 12,
     fontSize: 16,
-    fontWeight: "600",
-    color: "#000000",
+    color: COLORS.gray,
   },
   radio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: "#e0e0e0",
-    alignItems: "center",
-    justifyContent: "center",
+    borderColor: COLORS.gray,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedRadio: {
-    borderColor: "#4169e1",
+    borderColor: COLORS.primary,
   },
   radioDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: "#4169e1",
+    backgroundColor: COLORS.primary,
   },
   priceBreakdown: {
     backgroundColor: "#f8f9fa",
