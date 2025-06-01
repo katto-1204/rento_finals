@@ -36,11 +36,13 @@ export default function SearchScreen() {
   const [filteredCars, setFilteredCars] = useState(cars)
 
   useEffect(() => {
-    let filtered = [...cars]; // Create a copy of all cars
+    let filtered = cars ? [...cars] : []; // Add null check for cars
 
     // Apply search filter if there's a search query
-    if (searchQuery) {
+    if (searchQuery && filtered.length > 0) {
       filtered = filtered.filter((car) => {
+        if (!car || !car.name || !car.brand || !car.model) return false; // Add null checks
+        
         const searchLower = searchQuery.toLowerCase();
         return (
           car.name.toLowerCase().includes(searchLower) ||
@@ -51,8 +53,8 @@ export default function SearchScreen() {
     }
 
     // Apply brand filter if a brand is selected
-    if (selectedBrand) {
-      filtered = filtered.filter((car) => car.brand === selectedBrand);
+    if (selectedBrand && filtered.length > 0) {
+      filtered = filtered.filter((car) => car && car.brand === selectedBrand);
     }
 
     setFilteredCars(filtered);

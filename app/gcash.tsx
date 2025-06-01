@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: width * 0.4,
-    height: 60,
+    height: 100,
     marginBottom: 24,
   },
   merchantName: {
