@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, FlatList } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, FlatList, Modal } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
@@ -9,6 +9,7 @@ import { auth } from "../../config/firebase"
 import type { Car } from "../../types/car"
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const { width } = Dimensions.get("window")
@@ -153,6 +154,7 @@ export default function HomeScreen() {
     airline: '',
     terminal: '',
   })
+  const [showPromoModal, setShowPromoModal] = useState(false)
 
   useEffect(() => {
     if (auth.currentUser?.displayName) {
@@ -163,6 +165,24 @@ export default function HomeScreen() {
       // Capitalize first letter
       setUserName(emailName.charAt(0).toUpperCase() + emailName.slice(1))
     }
+  }, [])
+
+  // Add this function inside HomeScreen component
+  const checkAndShowPromo = async () => {
+    try {
+      const hasSeenPromo = await AsyncStorage.getItem('hasSeenPromo')
+      if (!hasSeenPromo) {
+        setShowPromoModal(true)
+        await AsyncStorage.setItem('hasSeenPromo', 'true')
+      }
+    } catch (error) {
+      console.error('Error checking promo:', error)
+    }
+  }
+
+  // Add this to your existing useEffect or create a new one
+  useEffect(() => {
+    checkAndShowPromo()
   }, [])
 
   // Update the renderCarCard function
@@ -378,6 +398,47 @@ export default function HomeScreen() {
           />
         </View>
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showPromoModal}
+        onRequestClose={() => setShowPromoModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.promoModal}>
+            <TouchableOpacity 
+              style={styles.closeButton}
+              onPress={() => setShowPromoModal(false)}
+            >
+              <Ionicons name="close" size={24} color="#000000" />
+            </TouchableOpacity>
+            
+            <Image 
+              source={require('../../assets/cars/fordmustang.png')}
+              style={styles.promoImage}
+              resizeMode="contain"
+            />
+            
+            <Text style={styles.promoTitle}>Welcome Gift! 🎉</Text>
+            <Text style={styles.promoDescription}>
+              Get 25% OFF on your first car rental!
+              Use code: <Text style={styles.promoCode}>WELCOME25</Text>
+            </Text>
+            
+            <TouchableOpacity 
+              style={styles.promoButton}
+              onPress={() => {
+                setShowPromoModal(false)
+                router.push("/(tabs)/search")
+              }}
+            >
+              <Text style={styles.promoButtonText}>Browse Cars Now</Text>
+              <Ionicons name="arrow-forward" size={20} color="#ffffff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -653,5 +714,63 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  promoModal: {
+    width: width * 0.85,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 5,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: 15,
+    top: 15,
+    zIndex: 1,
+  },
+  promoImage: {
+    width: width * 0.7,
+    height: width * 0.5,
+    marginVertical: 20,
+  },
+  promoTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1054CF',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  promoDescription: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 24,
+  },
+  promoCode: {
+    color: '#FFB700',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  promoButton: {
+    backgroundColor: '#1054CF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 8,
+  },
+  promoButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 })
