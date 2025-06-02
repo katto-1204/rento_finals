@@ -322,7 +322,7 @@ export default function CarDetailsScreen() {
       {/* Booking Section */}
       <View style={styles.bookingContainer}>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>${car.pricePerDay}</Text>
+          <Text style={styles.price}>P{car.pricePerDay}</Text>
           <Text style={styles.priceLabel}>/day</Text>
         </View>
         <TouchableOpacity 

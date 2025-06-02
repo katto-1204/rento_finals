@@ -9,6 +9,7 @@ import { auth } from "../../config/firebase"
 import type { Car } from "../../types/car"
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
+import { onAuthStateChanged } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
@@ -155,6 +156,30 @@ export default function HomeScreen() {
     terminal: '',
   })
   const [showPromoModal, setShowPromoModal] = useState(false)
+  const [isNewLogin, setIsNewLogin] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(600) // 600 seconds = 10 minutes
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // User just logged in
+        const lastLoginTime = await AsyncStorage.getItem('lastLoginTime')
+        const currentTime = new Date().getTime()
+        
+        if (!lastLoginTime || (currentTime - parseInt(lastLoginTime)) > 24 * 60 * 60 * 1000) {
+          // Show promo if first login or last login was more than 24 hours ago
+          setShowPromoModal(true)
+          await AsyncStorage.setItem('lastLoginTime', currentTime.toString())
+        }
+      } else {
+        // User logged out - reset the promo flag
+        await AsyncStorage.removeItem('lastLoginTime')
+        setShowPromoModal(false)
+      }
+    })
+
+    return () => unsubscribe()
+  }, [])
 
   useEffect(() => {
     if (auth.currentUser?.displayName) {
@@ -167,23 +192,26 @@ export default function HomeScreen() {
     }
   }, [])
 
-  // Add this function inside HomeScreen component
-  const checkAndShowPromo = async () => {
-    try {
-      const hasSeenPromo = await AsyncStorage.getItem('hasSeenPromo')
-      if (!hasSeenPromo) {
-        setShowPromoModal(true)
-        await AsyncStorage.setItem('hasSeenPromo', 'true')
-      }
-    } catch (error) {
-      console.error('Error checking promo:', error)
-    }
-  }
-
-  // Add this to your existing useEffect or create a new one
+  // Add this useEffect for the countdown
   useEffect(() => {
-    checkAndShowPromo()
-  }, [])
+    if (showPromoModal && timeLeft > 0) {
+      const timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1)
+      }, 1000)
+
+      return () => clearInterval(timer)
+    } else if (timeLeft === 0) {
+      setShowPromoModal(false)
+      setTimeLeft(600) // Reset timer for next time
+    }
+  }, [showPromoModal, timeLeft])
+
+  // Add this helper function to format the time
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
 
   // Update the renderCarCard function
   const renderCarCard = ({ item }: { item: Car }) => (
@@ -414,13 +442,18 @@ export default function HomeScreen() {
               <Ionicons name="close" size={24} color="#000000" />
             </TouchableOpacity>
             
+            <View style={styles.timerContainer}>
+              <Ionicons name="time" size={20} color="#FFB700" />
+              <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+            </View>
+
             <Image 
-              source={require('../../assets/cars/fordmustang.png')}
+              source={require('../../assets/modal_360.gif')}
               style={styles.promoImage}
               resizeMode="contain"
             />
             
-            <Text style={styles.promoTitle}>Welcome Gift! 🎉</Text>
+            <Text style={styles.promoTitle}>Welcome Gift!</Text>
             <Text style={styles.promoDescription}>
               Get 25% OFF on your first car rental!
               Use code: <Text style={styles.promoCode}>WELCOME25</Text>
@@ -723,11 +756,20 @@ const styles = StyleSheet.create({
   },
   promoModal: {
     width: width * 0.85,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#FFB700', // Changed to yellow
     borderRadius: 20,
     padding: 20,
     alignItems: 'center',
     elevation: 5,
+    borderWidth: 2,
+    borderColor: '#1054CF',
+    shadowColor: '#1054CF',
+    shadowOffset: {
+      width: 0,
+      height: 0,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
   },
   closeButton: {
     position: 'absolute',
@@ -743,19 +785,19 @@ const styles = StyleSheet.create({
   promoTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1054CF',
+    color: '#1054cf', // Changed to white
     marginBottom: 12,
     textAlign: 'center',
   },
   promoDescription: {
     fontSize: 16,
-    color: '#666666',
+    color: '#000000', // Changed to black
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 24,
   },
   promoCode: {
-    color: '#FFB700',
+    color: '#ffffff', // Changed to blue
     fontWeight: 'bold',
     fontSize: 18,
   },
@@ -772,5 +814,23 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  countdownText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000000",
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  timerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  timerText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FFB700",
+    marginLeft: 8,
   },
 })
