@@ -234,38 +234,40 @@ export default function SearchScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Find Cars</Text>
-        <TouchableOpacity 
-          style={styles.devsButton} 
-          onPress={() => router.push("/developers")}
-        >
-          <Text style={styles.devsButtonText}>Devs</Text>
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
+      {/* Blue Background Rectangle */}
+      <View style={styles.blueBackground}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { color: "#ffffff" }]}>Find Cars</Text>
+          <TouchableOpacity 
+            style={[styles.devsButton, { backgroundColor: "#ffffff" }]} 
+            onPress={() => router.push("/developers")}
+          >
+            <Text style={[styles.devsButtonText, { color: "#1054CF" }]}>Devs</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* Top Brands */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Top Brands</Text>
+          <Text style={[styles.sectionTitle, { color: "#ffffff" }]}>Top Brands</Text>
           <FlatList
             key="brands"
             data={brands}
             renderItem={renderBrandItem}
             keyExtractor={(item) => item.id.toString()}
-            numColumns={4}  // Changed to 4 columns
+            numColumns={4}
             scrollEnabled={false}
             contentContainerStyle={styles.brandsGrid}
           />
         </View>
+      </View>
 
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Map View */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Map View</Text>
           <DummyMap />
         </View>
-
+        
         {/* All Cars / Filtered Cars */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -313,15 +315,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ededed",
+    paddingHorizontal: 20, // Add this to maintain margins for other content
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 60, // Increased padding to match original margins
     paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   title: {
     fontSize: 24,
@@ -329,13 +330,13 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   devsButton: {
-    backgroundColor: "#1054CF", // Updated blue
+    backgroundColor: "#ffffff",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
   },
   devsButtonText: {
-    color: "#ffffff",
+    color: "#1054CF",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -360,7 +361,7 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   section: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 5, // Increased padding for sections inside blue background
     marginBottom: 30,
   },
   sectionHeader: {
@@ -397,20 +398,19 @@ const styles = StyleSheet.create({
   brandCard: {
     flex: 1,
     aspectRatio: 1,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 50, // Make it circular
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 50,
     alignItems: "center",
     justifyContent: "center",
     margin: 8,
     borderWidth: 1,
     borderColor: "transparent",
-    maxWidth: (width - 80) / 4, // Adjust for 4 columns
-    height: (width - 80) / 4, // Make it square
+    maxWidth: (width - 80) / 4,
+    height: (width - 80) / 4,
   },
   selectedBrandCard: {
-    backgroundColor: "#e3f2fd",
-    borderColor: "#4169e1", // blue
-    borderWidth: 1,         // 1px solid
+    backgroundColor: "#ffffff",
+    borderColor: "#ffffff",
   },
   brandLogoImg: {
     width: 28, // Smaller logo
@@ -420,11 +420,11 @@ const styles = StyleSheet.create({
   brandName: {
     fontSize: 10, // Smaller font
     fontWeight: "600",
-    color: "#666666",
+    color: "#ffffff",
     textAlign: "center",
   },
   selectedBrandName: {
-    color: "#4169e1",
+    color: "#1054CF",
   },
   mapContainer: {
     height: 200,
@@ -583,5 +583,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 10,
     color: '#000000',
+  },
+  blueBackground: {
+    backgroundColor: "#1054CF",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    marginBottom: 20,
+    // Remove marginHorizontal to extend beyond margins
+    paddingBottom: 20,
+    // Add negative margin to extend beyond SafeAreaView padding if any
+    marginLeft: -20,
+    marginRight: -20,
   },
 })

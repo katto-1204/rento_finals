@@ -124,7 +124,7 @@ export default function LikedCarsScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#000" />
+          <Ionicons name="arrow-back" size={24} color="#1054CF" />
         </TouchableOpacity>
         <Text style={styles.title}>Liked Cars</Text>
         <View style={{ width: 24 }} />
@@ -139,7 +139,7 @@ export default function LikedCarsScreen() {
         />
       ) : (
         <View style={styles.emptyState}>
-          <Ionicons name="heart-outline" size={64} color="#666" />
+          <Ionicons name="heart-outline" size={80} color="#1054CF" />
           <Text style={styles.emptyText}>No liked cars yet</Text>
         </View>
       )}
@@ -150,7 +150,7 @@ export default function LikedCarsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFB700", // Changed to yellow background
   },
   header: {
     flexDirection: "row",
@@ -158,63 +158,76 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "rgba(16, 84, 207, 0.2)", // Translucent blue
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "bold",
+    color: "#1054CF", // Dark blue text
   },
   listContainer: {
     padding: 16,
   },
   carCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
+    backgroundColor: "rgba(16, 84, 207, 0.1)", // Translucent blue
+    borderRadius: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    borderWidth: 1,
+    borderColor: "#1054CF", // Dark blue border
+    shadowColor: "#1054CF",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
   },
   carImage: {
     width: "100%",
     height: 200,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   cardContent: {
-    padding: 16,
+    padding: 20,
   },
   cardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   carName: {
-    fontSize: 18,
-    fontWeight: "600",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1054CF", // Dark blue text
   },
   carPrice: {
-    fontSize: 16,
+    fontSize: 18,
     color: "#1054CF",
     fontWeight: "600",
   },
   unlikeButton: {
-    padding: 4,
+    padding: 8,
+    backgroundColor: "rgba(255, 75, 75, 0.1)", // Translucent red
+    borderRadius: 20,
   },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(16, 84, 207, 0.05)", // Very light translucent blue
+    margin: 20,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderStyle: "dashed",
+    borderColor: "#1054CF",
   },
   emptyText: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: 18,
+    color: "#1054CF",
     marginTop: 16,
+    fontWeight: "600",
   },
 })

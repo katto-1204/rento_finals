@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, FlatList, Modal } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions, FlatList, Modal, ImageSourcePropType } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
@@ -11,6 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker'
 import { Platform } from 'react-native'
 import { onAuthStateChanged } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { cars } from "../../data/cars"
 
 
 const { width } = Dimensions.get("window")
@@ -33,108 +34,8 @@ const coupons = [
 ]
 
 // Update featuredCars type
-const featuredCars: Car[] = [
-  {
-    id: "1", // Change to string to match Car interface
-    name: "BMW X5",
-    brand: "BMW",
-    pricePerDay: 120, // Change price to number
-    location: "Davao City",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Qk1XIFg1PC90ZXh0Pgo8L3N2Zz4K",
-    // Add other required Car properties
-    model: "X5",
-    year: 2023,
-    seats: 5,
-    rating: 4.8,
-    availability: true,
-    type: "SUV",
-    createdAt: new Date(),
-  },
-  {
-    id: "2",
-    name: "Mercedes C-Class",
-    brand: "Mercedes",
-    pricePerDay: 100,
-    location: "Davao City",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+TWVyY2VkZXM8L3RleHQ+Cjwvc3ZnPgo=",
-    model: "C-Class",
-    year: 2023,
-    seats: 5,
-    rating: 4.7,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-  },
-  {
-    id: "3",
-    name: "Audi A4",
-    brand: "Audi",
-    pricePerDay: 90,
-    location: "Davao City",
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+QXVkaSBBNDwvdGV4dD4KPC9zdmc+Cg==",
-    model: "A4",
-    year: 2023,
-    seats: 5,
-    rating: 4.6,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-  },
-]
-
-const recentlyRented: Car[] = [
-  {
-    id: "1",
-    name: "Toyota Camry",
-    brand: "Toyota",
-    model: "Camry",
-    year: 2023,
-    pricePerDay: 80,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.5,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjNjY2NjY2Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+VG95b3RhPC90ZXh0Pgo8L3N2Zz4K",
-  },
-  {
-    id: "2",
-    name: "Honda Civic",
-    brand: "Honda",
-    model: "Civic",
-    year: 2023,
-    pricePerDay: 70,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.3,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjOTk5OTk5Ii8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9IndoaXRlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+SG9uZGE8L3RleHQ+Cjwvc3ZnPgo=",
-  },
-  {
-    id: "3",
-    name: "Nissan Altima",
-    brand: "Nissan",
-    model: "Altima",
-    year: 2023,
-    pricePerDay: 75,
-    location: "Davao City",
-    seats: 5,
-    rating: 4.4,
-    availability: true,
-    type: "Sedan",
-    createdAt: new Date(),
-    image:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDIwMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjY2NjY2NjIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iNjAiIGZpbGw9ImJsYWNrIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCI+Tmlzc2FuPC90ZXh0Pgo8L3N2Zz4K",
-  },
-]
+const featuredCars = cars.filter(car => car.rating >= 4.5).slice(0, 5)
+const recentlyRented = cars.slice(0, 4) // Just for demo, normally would be from booking history
 
 export default function HomeScreen() {
   const [currentCouponIndex, setCurrentCouponIndex] = useState(0)
@@ -226,7 +127,11 @@ export default function HomeScreen() {
       })}
       activeOpacity={0.7}
     >
-      <Image source={{ uri: item.image }} style={styles.carImage} />
+      <Image 
+        source={item.image} 
+        style={styles.carImage}
+        resizeMode="cover"
+      />
       <View style={styles.carInfo}>
         <Text style={styles.carName}>{item.name}</Text>
         <Text style={styles.carBrand}>{item.brand}</Text>
@@ -239,25 +144,22 @@ export default function HomeScreen() {
               color={index < Math.floor(item.rating) ? "#FFB700" : "#e0e0e0"}
             />
           ))}
-          <Text style={styles.ratingText}>{item.rating}</Text>
+          <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
         </View>
         <View style={styles.carDetails}>
-          <View style={styles.seatsContainer}>
-            <Ionicons name="people" size={16} color="#ffffff" />
-            <Text style={styles.seatsText}>{item.seats} Seats</Text>
+          <View style={styles.detailsRow}>
+            <View style={styles.detailItem}>
+              <Ionicons name="people" size={16} color="#ffffff" />
+              <Text style={styles.detailText}>{item.seats}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Ionicons name="speedometer" size={16} color="#ffffff" />
+              <Text style={styles.detailText}>{item.type}</Text>
+            </View>
           </View>
           <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
         </View>
       </View>
-      <TouchableOpacity 
-        style={styles.arrowButton}
-        onPress={() => router.push({
-          pathname: "/car-details/[id]",
-          params: { id: item.id }
-        })}
-      >
-        <Ionicons name="arrow-forward" size={24} color="#FFB700" />
-      </TouchableOpacity>
     </TouchableOpacity>
   )
 
@@ -276,6 +178,86 @@ export default function HomeScreen() {
       }))
     }
   }
+
+  // Add ImageSourcePropType to imports at the top
+  // Add this function after renderCarCard
+  const renderRecentCarCard = ({ item }: { item: Car }) => (
+    <TouchableOpacity
+      style={styles.recentCarCard}
+      onPress={() => router.push({
+        pathname: "/car-details/[id]",
+        params: { id: item.id }
+      })}
+      activeOpacity={0.7}
+    >
+      <Image 
+        source={item.image as ImageSourcePropType}
+        style={styles.recentCarImage}
+        resizeMode="cover"
+      />
+      <View style={styles.recentCarInfo}>
+        <Text style={styles.recentCarName}>{item.name}</Text>
+        <View style={styles.ratingContainer}>
+          {[...Array(5)].map((_, index) => (
+            <Ionicons
+              key={index}
+              name="star"
+              size={14}
+              color={index < Math.floor(item.rating) ? "#FFB700" : "#e0e0e0"}
+            />
+          ))}
+          <Text style={styles.ratingText}>{item.rating.toFixed(1)}</Text>
+        </View>
+        <Text style={styles.recentCarPrice}>${item.pricePerDay}/day</Text>
+      </View>
+    </TouchableOpacity>
+  )
+
+  // Add this function for rendering featured cars
+  const renderFeaturedCarCard = ({ item }: { item: Car }) => (
+    <TouchableOpacity
+      style={styles.featuredCarCard}
+      onPress={() => router.push({
+        pathname: "/car-details/[id]",
+        params: { id: item.id }
+      })}
+      activeOpacity={0.7}
+    >
+      <Image 
+        source={item.image} 
+        style={styles.featuredCarImage}
+        resizeMode="cover"
+      />
+      <View style={styles.featuredCardOverlay}>
+        <View style={styles.featuredCarInfo}>
+          <Text style={styles.featuredCarName}>{item.name}</Text>
+          <Text style={styles.featuredCarBrand}>{item.brand}</Text>
+          <View style={styles.featuredRatingContainer}>
+            {[...Array(5)].map((_, index) => (
+              <Ionicons
+                key={index}
+                name="star"
+                size={14}
+                color={index < Math.floor(item.rating) ? "#FFB700" : "#e0e0e0"}
+              />
+            ))}
+            <Text style={styles.featuredRatingText}>{item.rating.toFixed(1)}</Text>
+          </View>
+          <View style={styles.featuredDetailsRow}>
+            <View style={styles.featuredDetailItem}>
+              <Ionicons name="people" size={14} color="#ffffff" />
+              <Text style={styles.featuredDetailText}>{item.seats}</Text>
+            </View>
+            <View style={styles.featuredDetailItem}>
+              <Ionicons name="speedometer" size={14} color="#ffffff" />
+              <Text style={styles.featuredDetailText}>{item.type}</Text>
+            </View>
+          </View>
+          <Text style={styles.featuredCarPrice}>${item.pricePerDay}/day</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  )
 
   return (
     <SafeAreaView style={styles.container}>
@@ -423,12 +405,30 @@ export default function HomeScreen() {
 
         {/* Featured Cars */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Featured Cars (Most Popular)</Text>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Cars</Text>
+            <TouchableOpacity onPress={() => router.push("/(tabs)/search")}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
           <FlatList
             data={featuredCars}
-            renderItem={renderCarCard}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={renderFeaturedCarCard}
             keyExtractor={(item) => item.id}
-            showsVerticalScrollIndicator={false}
+            snapToInterval={width} // Full width snap
+            decelerationRate={0.9}
+            contentContainerStyle={styles.featuredCarsContainer}
+            snapToAlignment="center"
+            getItemLayout={(data, index) => ({
+              length: width,
+              offset: width * index,
+              index,
+            })}
+            initialScrollIndex={0}
+            pagingEnabled
           />
         </View>
 
@@ -440,27 +440,19 @@ export default function HomeScreen() {
               <Text style={styles.viewAllText}>View All</Text>
             </TouchableOpacity>
           </View>
+          
           <FlatList
             data={recentlyRented}
             horizontal
             showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.horizontalCarCard}
-                onPress={() => router.push({
-                  pathname: "/car-details/[id]",
-                  params: { id: item.id }
-                })}
-                activeOpacity={0.7}
-              >
-                <Image source={{ uri: item.image }} style={styles.horizontalCarImage} />
-                <Text style={styles.horizontalCarName}>{item.name}</Text>
-                <Text style={styles.horizontalCarPrice}>${item.pricePerDay}/day</Text>
-              </TouchableOpacity>
-            )}
+            renderItem={renderRecentCarCard}
             keyExtractor={(item) => item.id}
+            contentContainerStyle={{ paddingRight: 20 }}
           />
         </View>
+
+        {/* Add this at the bottom of your ScrollView, after all other sections */}
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       <Modal
@@ -688,47 +680,45 @@ const styles = StyleSheet.create({
     color: "#4169e1",
   },
   section: {
-    paddingHorizontal: 20,
-    marginBottom: 30,
+    marginVertical: 24,
   },
   sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   viewAllText: {
-    color: "#1054CF", // Updated blue
     fontSize: 14,
-    fontWeight: "600",
+    fontWeight: '600',
+    color: '#1054CF',
   },
   carCard: {
-    flexDirection: "row",
-    backgroundColor: "#1054CF", // Updated blue
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: "center",
+    backgroundColor: "#1054CF",
+    borderRadius: 16,
+    marginBottom: 16,
+    overflow: 'hidden',
+    elevation: 5,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
   },
   carImage: {
-    width: 80,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 16,
+    width: "100%",
+    height: 180,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   carInfo: {
-    flex: 1,
+    padding: 16,
   },
   carName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#ffffff",
     marginBottom: 4,
@@ -736,154 +726,169 @@ const styles = StyleSheet.create({
   carBrand: {
     fontSize: 14,
     color: "#ffffff",
-    marginBottom: 8,
+    opacity: 0.8,
+    marginBottom: 12,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 12,
   },
   ratingText: {
-    marginLeft: 4,
+    marginLeft: 8,
     color: "#ffffff",
     fontSize: 14,
+    fontWeight: "600",
   },
-  carDetails: {
+  detailsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    gap: 16,
+    marginBottom: 12,
   },
-  seatsContainer: {
+  detailItem: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    gap: 6,
   },
-  seatsText: {
+  detailText: {
     color: "#ffffff",
-    marginLeft: 4,
     fontSize: 14,
   },
   carPrice: {
-    fontSize: 16,
-    fontWeight: "600",
+    fontSize: 18,
+    fontWeight: "700",
     color: "#FFB700",
   },
-  arrowButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginLeft: 12,
+  bottomSpacer: {
+    height: 100, // Adjust this value based on your tab bar height
   },
+  
+  // Update horizontal car card styles
   horizontalCarCard: {
-    width: 150,
+    width: width * 0.7,
     backgroundColor: "#ffffff",
-    borderRadius: 12,
-    padding: 12,
-    marginRight: 12,
+    borderRadius: 16,
+    marginRight: 16,
+    overflow: 'hidden',
+    elevation: 4,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 4,
   },
   horizontalCarImage: {
     width: "100%",
-    height: 80,
-    borderRadius: 8,
-    marginBottom: 8,
+    height: 140,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  horizontalCarInfo: {
+    padding: 16,
   },
   horizontalCarName: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "bold",
-    color: "#000000",
-    marginBottom: 4,
+    color: "#1054CF",
+    marginBottom: 8,
   },
   horizontalCarPrice: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1054CF", // Updated blue
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#666666",
-  },
-  dateTimeText: {
-    fontSize: 14,
-    color: "#666666",
-    marginLeft: 10,
-    flex: 1,
-  },
-  findCarsButtonText: {
-    color: "#ffffff",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
+    color: "#FFB700",
   },
+
+  // Header styles
+  headerButtons: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(16, 84, 207, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  // Car details styles
+  carDetails: {
+    marginTop: 12,
+  },
+
+  // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   promoModal: {
-    width: width * 0.85,
-    backgroundColor: '#FFB700', // Changed to yellow
+    backgroundColor: '#ffffff',
+    width: '90%',
     borderRadius: 20,
-    padding: 20,
+    padding: 24,
     alignItems: 'center',
-    elevation: 5,
-    borderWidth: 2,
-    borderColor: '#1054CF',
-    shadowColor: '#1054CF',
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
   },
   closeButton: {
     position: 'absolute',
-    right: 15,
-    top: 15,
+    right: 16,
+    top: 16,
     zIndex: 1,
   },
+  timerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(16, 84, 207, 0.1)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  timerText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1054CF',
+    marginLeft: 8,
+  },
   promoImage: {
-    width: width * 0.7,
-    height: width * 0.5,
-    marginVertical: 20,
+    width: '100%',
+    height: 200,
+    marginBottom: 20,
   },
   promoTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#1054cf', // Changed to white
+    color: '#1054CF',
     marginBottom: 12,
     textAlign: 'center',
   },
   promoDescription: {
     fontSize: 16,
-    color: '#000000', // Changed to black
+    color: '#666666',
     textAlign: 'center',
     marginBottom: 24,
     lineHeight: 24,
   },
   promoCode: {
-    color: '#ffffff', // Changed to blue
+    color: '#1054CF',
     fontWeight: 'bold',
-    fontSize: 18,
   },
   promoButton: {
     backgroundColor: '#1054CF',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 24,
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
     gap: 8,
   },
   promoButtonText: {
@@ -891,61 +896,142 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  countdownText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#000000",
-    marginTop: 10,
-    marginBottom: 20,
-  },
-  timerContainer: {
-    position: 'absolute',
-    top: 30, // Move down from top
-    alignSelf: 'center', // Center horizontally
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 24,
-    zIndex: 1,
-    borderWidth: 1,
-    borderColor: '#1054CF',
-    elevation: 3,
-    shadowColor: '#000',
+
+  // Featured car styles
+  featuredCarCard: {
+    width: width - 40,
+    height: 280,
+    backgroundColor: "#FFB700",
+    borderRadius: 20,
+    overflow: 'visible', // Changed back to visible for overflow
+    borderWidth: 2,
+    borderColor: "#1054CF",
+    elevation: 8,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    marginHorizontal: 20,
+    position: 'relative',
   },
-  timerText: {
-    color: '#1054CF',
-    fontWeight: 'bold',
-    fontSize: 20,
+
+  featuredCarImage: {
+    width: "90%",
+    height: 180,
+    position: 'absolute',
+    top: -30,
+    left: "5%",
+    zIndex: 1, // Middle layer
+    borderRadius: 16,
+  },
+
+  featuredCardOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingTop: 140,
+    zIndex: 2, // Top layer
+  },
+
+  featuredCarInfo: {
+    padding: 16,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    borderRadius: 12,
+    marginTop: 'auto',
+    elevation: 3, // Add elevation for Android
+  },
+  featuredCarName: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#ffffff",
+    marginBottom: 4,
+  },
+  featuredCarBrand: {
+    fontSize: 16,
+    color: "#ffffff",
+    opacity: 0.9,
+    marginBottom: 12,
+  },
+  featuredRatingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  featuredRatingText: {
     marginLeft: 8,
-    letterSpacing: 2,
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "600",
   },
-  headerButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  featuredDetailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
-  iconButton: {
-    width: 40,
-    height: 40,
+  featuredDetailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: '#ffffff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    gap: 8,
+  },
+  featuredDetailText: {
+    color: "#ffffff",
+    fontSize: 14,
+  },
+  featuredCarPrice: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#ffffff",
+  },
+
+  // Recent car styles
+  recentCarCard: {
+    width: width * 0.6,
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    marginLeft: 20,
+    overflow: 'hidden',
+    elevation: 4,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 2,
+    shadowRadius: 4,
+  },
+  recentCarImage: {
+    width: "100%",
+    height: 160,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+  recentCarInfo: {
+    padding: 16,
+  },
+  recentCarName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1054CF",
+    marginBottom: 8,
+  },
+  recentCarPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#FFB700",
+  },
+
+  featuredCarsContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 40, // Space for the overflowing image
+    paddingBottom: 10,
   },
 })

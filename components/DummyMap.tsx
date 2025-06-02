@@ -54,7 +54,7 @@ const carRentalLocations: Location[] = [
       name: "Victoria Plaza",
       address: "R. Magsaysay Ave, Davao City",
       cars: 7,
-      x: 18,
+      x: 68,
       y: 58,
       type: "standard"
     },

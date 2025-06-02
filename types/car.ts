@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from 'react-native';
+
 export interface Car {
   id: string;
   name: string;
@@ -6,7 +8,7 @@ export interface Car {
   year: number;
   pricePerDay: number;
   location: string;
-  image: string;
+  image: ImageSourcePropType;
   seats: number;
   rating: number;
   availability: boolean;
