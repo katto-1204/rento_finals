@@ -363,8 +363,8 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   section: {
-    paddingHorizontal: 15,
-    marginBottom: 15, // Reduced spacing between sections
+    paddingHorizontal: 10,
+    marginBottom: 10, // Reduced spacing between sections
   },
   sectionHeader: {
     flexDirection: "row",
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5, // Reduced from 8
     marginLeft: -20,
     marginRight: -20,
-    paddingHorizontal: 25,
+    paddingHorizontal: 5,
     paddingTop: 10, // Reduced from 15
   },
 })
