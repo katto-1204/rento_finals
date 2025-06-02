@@ -161,7 +161,7 @@ export const cars = [
   },
   {
     id: "11",
-    name: "Toyota Land Cruiser",
+    name: "Land Cruiser",
     brand: "Toyota",
     model: "Land Cruiser",
     year: 2023,
@@ -369,7 +369,7 @@ export const cars = [
   },
   {
     id: "24",
-    name: "Hyundai Veloster N",
+    name: "Veloster N",
     brand: "Hyundai",
     model: "Veloster N",
     year: 2023,

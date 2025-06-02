@@ -97,7 +97,7 @@ const DummyMap = () => {
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
             <Ionicons name="car" size={24} color="#fff" />
-            <Text style={styles.headerTitle}>Car Rental Locations</Text>
+            <Text style={styles.headerTitle}>Google Maps</Text>
           </View>
           <Text style={styles.headerSubtitle}>Davao City, Philippines</Text>
         </View>

@@ -151,6 +151,7 @@ export default function SearchScreen() {
   const getCardStyle = () => ({
     ...styles.carCard,
     maxWidth: selectedBrand ? width - 32 : (width - 40) / 2,
+    height: selectedBrand ? 340 : 280, // Only increase height when brand is selected
   });
 
   const handleLikeCar = async (carName: string) => {
@@ -321,8 +322,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 60, // Increased padding to match original margins
-    paddingVertical: 20,
+    paddingHorizontal: 20, // Reduced from 60
+    paddingVertical: 15, // Adjusted padding
+    marginBottom: 10, // Added bottom margin
   },
   title: {
     fontSize: 24,
@@ -361,8 +363,8 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   section: {
-    paddingHorizontal: 5, // Increased padding for sections inside blue background
-    marginBottom: 30,
+    paddingHorizontal: 15,
+    marginBottom: 15, // Reduced spacing between sections
   },
   sectionHeader: {
     flexDirection: "row",
@@ -374,7 +376,8 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000000",
-    marginBottom: 15,
+    marginBottom: 10, // Reduced from 15
+    marginTop: 5, // Reduced from 10
   },
   filterButton: {
     flexDirection: "row",
@@ -394,6 +397,8 @@ const styles = StyleSheet.create({
   },
   brandsGrid: {
     paddingHorizontal: 4,
+    paddingTop: 0, // Removed extra top padding
+    paddingBottom: 5, // Added small bottom padding
   },
   brandCard: {
     flex: 1,
@@ -588,11 +593,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#1054CF",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    marginBottom: 20,
-    // Remove marginHorizontal to extend beyond margins
-    paddingBottom: 20,
-    // Add negative margin to extend beyond SafeAreaView padding if any
+    marginBottom: 8, // Reduced from 10
+    paddingBottom: 5, // Reduced from 8
     marginLeft: -20,
     marginRight: -20,
+    paddingHorizontal: 25,
+    paddingTop: 10, // Reduced from 15
   },
 })
