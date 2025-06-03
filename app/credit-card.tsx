@@ -1,10 +1,12 @@
 "use client"
 
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Image, Animated } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Image, Animated, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
 import { useRef, useState } from 'react'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from "../config/firebase"
 
 const COLORS = {
   background: "#FFFFFF",
@@ -16,9 +18,43 @@ const COLORS = {
 }
 
 export default function CreditCardScreen() {
-  const { amount: amountParam } = useLocalSearchParams<{ amount: string }>()
+  // Get params at component level
+  const { amount: amountParam, bookingId } = useLocalSearchParams<{ amount: string, bookingId: string }>()
   const amount = parseFloat(amountParam || "0")
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  // Update the handlePaymentSuccess function
+  const handlePaymentSuccess = async () => {
+    try {
+      if (!cardNumber || !cardName || !expiry || !cvv) {
+        Alert.alert("Error", "Please fill in all card details")
+        return
+      }
+
+      // Update the booking status to "Upcoming" after successful payment
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "Upcoming",
+        payment: {
+          method: "Credit Card",
+          amount: amount,
+          transactionId: `CC-${Math.random().toString(36).substr(2, 9)}`,
+          paidAt: new Date(),
+          status: "Completed",
+          lastFourDigits: cardNumber.slice(-4),
+          cardholderName: cardName
+        }
+      })
+
+      setShowSuccessModal(true)
+      setTimeout(() => {
+        setShowSuccessModal(false)
+        router.replace("/(tabs)/bookings") // Use replace instead of push
+      }, 2000)
+    } catch (error) {
+      console.error("Error updating booking:", error)
+      Alert.alert("Error", "Payment recorded but booking status update failed")
+    }
+  }
 
   // Add states for card details
   const [cardNumber, setCardNumber] = useState('')
@@ -196,7 +232,7 @@ export default function CreditCardScreen() {
             setShowSuccessModal(true)
             setTimeout(() => {
               setShowSuccessModal(false)
-              router.replace("/(tabs)/bookings")
+              handlePaymentSuccess()
             }, 2000)
           }}
         >

@@ -290,16 +290,28 @@ export default function HomeScreen() {
               <Text style={styles.flag}>🇵🇭</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={styles.notificationButton} 
-            onPress={() => router.push("/notifications")}
-          >
-            <Ionicons 
-              name={hasNotifications ? "notifications" : "notifications-outline"} 
-              size={24} 
-              color="#1054CF"
-            />
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              onPress={() => router.push("/likedcars")}
+            >
+              <Ionicons 
+                name="heart" 
+                size={24} 
+                color="#1054CF"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              onPress={() => router.push("/notifications")}
+            >
+              <Ionicons 
+                name={hasNotifications ? "notifications" : "notifications-outline"} 
+                size={24} 
+                color="#1054CF"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Search Bar - New Component */}
@@ -914,5 +926,26 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginLeft: 8,
     letterSpacing: 2,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
 })

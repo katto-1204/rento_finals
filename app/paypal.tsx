@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Modal } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image, Modal, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 const COLORS = {
   background: "#FFFFFF",
@@ -16,13 +18,39 @@ const COLORS = {
 }
 
 export default function PayPalScreen() {
-  const { amount: amountParam } = useLocalSearchParams<{ amount: string }>()
-  const amount = parseFloat(amountParam || "0")
+  const { amount, bookingId } = useLocalSearchParams<{ amount: string, bookingId: string }>()
+  const parsedAmount = parseFloat(amount || "0")
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+
+  const handlePaymentSuccess = async () => {
+    try {
+      // Update the booking status to "Upcoming" after successful payment
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "Upcoming",
+        payment: {
+          method: "PayPal",
+          amount: parsedAmount,
+          transactionId: `PP-${Math.random().toString(36).substr(2, 9)}`,
+          paidAt: new Date(),
+          status: "Completed",
+          email: email
+        }
+      })
+
+      setShowSuccessModal(true)
+      setTimeout(() => {
+        setShowSuccessModal(false)
+        router.replace("/(tabs)/bookings") // Use replace instead of push
+      }, 2000)
+    } catch (error) {
+      console.error("Error updating booking:", error)
+      Alert.alert("Error", "Payment recorded but booking status update failed")
+    }
+  }
 
   if (isLoggedIn) {
     return (
@@ -45,7 +73,7 @@ export default function PayPalScreen() {
 
           <View style={styles.amountContainer}>
             <Text style={styles.amountLabel}>Amount to Pay</Text>
-            <Text style={styles.amount}>${amount.toFixed(2)}</Text>
+            <Text style={styles.amount}>${parsedAmount.toFixed(2)}</Text>
           </View>
 
           <TouchableOpacity 
@@ -54,11 +82,11 @@ export default function PayPalScreen() {
               setShowSuccessModal(true);
               setTimeout(() => {
                 setShowSuccessModal(false);
-                router.replace("/(tabs)/bookings");
+                handlePaymentSuccess();
               }, 2000);
             }}
           >
-            <Text style={styles.payButtonText}>Pay {amount.toFixed(2)}</Text>
+            <Text style={styles.payButtonText}>Pay {parsedAmount.toFixed(2)}</Text>
           </TouchableOpacity>
         </View>
 

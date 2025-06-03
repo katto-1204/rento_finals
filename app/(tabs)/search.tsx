@@ -11,12 +11,18 @@ import {
   FlatList,
   Image,
   Dimensions,
+  Modal,
+  Alert,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import DummyMap from '../../components/DummyMap';
 import { cars } from "../../data/cars";
+import { db } from "../../config/firebase"
+import { collection, addDoc, deleteDoc, getDocs, query, where, doc } from "firebase/firestore"
+import { useAuth } from "../../hooks/useAuth"
+import type { User } from "../../types"
 
 const { width } = Dimensions.get("window")
 
@@ -35,6 +41,67 @@ export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [filteredCars, setFilteredCars] = useState(cars)
+  const { user } = useAuth()
+  const [likedCars, setLikedCars] = useState<string[]>([])
+  const [showLikeModal, setShowLikeModal] = useState(false)
+  const [likedCarName, setLikedCarName] = useState("")
+
+  const fetchLikedCars = async () => {
+    if (!user?.id) return
+    
+    try {
+      const q = query(
+        collection(db, "likedCars"), 
+        where("userId", "==", user.id)
+      )
+      const querySnapshot = await getDocs(q)
+      const likedCarIds = querySnapshot.docs.map(doc => doc.data().carId)
+      setLikedCars(likedCarIds)
+    } catch (error) {
+      console.error("Error fetching liked cars:", error)
+    }
+  }
+
+  const handleLike = async (car: any) => {
+    if (!user?.id) {
+      Alert.alert("Please login to like cars")
+      return
+    }
+
+    try {
+      if (likedCars.includes(car.id)) {
+        // Unlike
+        const q = query(
+          collection(db, "likedCars"),
+          where("userId", "==", user.id),
+          where("carId", "==", car.id)
+        )
+        const querySnapshot = await getDocs(q)
+        querySnapshot.forEach(async (document) => {
+          await deleteDoc(doc(db, "likedCars", document.id))
+        })
+        setLikedCars(prev => prev.filter(id => id !== car.id))
+      } else {
+        // Like
+        await addDoc(collection(db, "likedCars"), {
+          userId: user.id,
+          carId: car.id,
+          createdAt: new Date(),
+        })
+        setLikedCars(prev => [...prev, car.id])
+        setLikedCarName(car.name)
+        setShowLikeModal(true)
+        setTimeout(() => setShowLikeModal(false), 2000)
+      }
+    } catch (error) {
+      console.error("Error handling like:", error)
+      Alert.alert("Error", "Could not process your request")
+    }
+  }
+
+  useEffect(() => {
+    fetchLikedCars()
+  }, [user])
 
   useEffect(() => {
     let filtered = cars ? [...cars] : []; // Add null check for cars
@@ -86,6 +153,26 @@ export default function SearchScreen() {
     maxWidth: selectedBrand ? width - 32 : (width - 40) / 2,
   });
 
+  const handleLikeCar = async (carName: string) => {
+    if (!user) {
+      // If not logged in, show alert
+      Alert.alert("Please log in to like cars.")
+      return
+    }
+
+    const isLiked = likedCars.includes(carName)
+
+    if (isLiked) {
+      // If already liked, remove from liked cars
+      setLikedCars(likedCars.filter(name => name !== carName))
+      // TODO: Add code to remove from Firestore
+    } else {
+      // If not liked yet, add to liked cars
+      setLikedCars([...likedCars, carName])
+      // TODO: Add code to add to Firestore
+    }
+  }
+
   const renderCarItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
       style={getCardStyle()} 
@@ -100,8 +187,15 @@ export default function SearchScreen() {
           <Ionicons name="location" size={16} color="#fff" />
           <Text style={styles.locationText}>Davao City</Text>
         </View>
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Ionicons name="heart-outline" size={20} color="#fff" />
+        <TouchableOpacity 
+          style={styles.favoriteButton}
+          onPress={() => handleLike(item)}
+        >
+          <Ionicons 
+            name={likedCars.includes(item.id) ? "heart" : "heart-outline"} 
+            size={20} 
+            color="#fff" 
+          />
         </TouchableOpacity>
       </View>
 
@@ -196,6 +290,21 @@ export default function SearchScreen() {
           />
         </View>
       </ScrollView>
+
+      {/* Like Car Modal */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showLikeModal}
+        onRequestClose={() => setShowLikeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Ionicons name="heart" size={40} color="#FF4B4B" />
+            <Text style={styles.modalText}>You liked {likedCarName}!</Text>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -448,5 +557,31 @@ const styles = StyleSheet.create({
   carRow: {
     justifyContent: 'space-between',
     paddingHorizontal: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    padding: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#000000',
   },
 })

@@ -1,10 +1,12 @@
 "use client"
 
 import { useState } from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Modal } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, Modal, Alert } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { router, useLocalSearchParams } from 'expo-router'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 const { width } = Dimensions.get('window')
 
@@ -17,11 +19,36 @@ const COLORS = {
 }
 
 export default function GCashScreen() {
+  const { amount: amountParam, bookingId } = useLocalSearchParams<{ amount: string, bookingId: string }>()
   const [showQRModal, setShowQRModal] = useState(true)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
-  const { amount: amountParam } = useLocalSearchParams<{ amount: string }>()
   const amount = parseFloat(amountParam || "0")
   const balance = 388.84
+
+  const handlePaymentSuccess = async () => {
+    try {
+      // Update the booking status and add payment details
+      await updateDoc(doc(db, "bookings", bookingId), {
+        status: "Upcoming",
+        payment: {
+          method: "GCash",
+          amount: amount,
+          transactionId: `GC-${Math.random().toString(36).substr(2, 9)}`,
+          paidAt: new Date(),
+          status: "Completed"
+        }
+      })
+
+      setShowSuccessModal(true)
+      setTimeout(() => {
+        setShowSuccessModal(false)
+        router.replace("/(tabs)/bookings") // Use replace instead of push
+      }, 2000)
+    } catch (error) {
+      console.error("Error updating booking:", error)
+      Alert.alert("Error", "Payment recorded but booking status update failed")
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,7 +161,7 @@ export default function GCashScreen() {
               setShowSuccessModal(true);
               setTimeout(() => {
                 setShowSuccessModal(false);
-                router.replace("/(tabs)/bookings");
+                handlePaymentSuccess();
               }, 2000);
             }}
           >

@@ -1,11 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, FlatList, Modal, TextInput, Image } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router, useLocalSearchParams } from "expo-router"
 import { cars } from "../data/cars"
+import { db } from "../config/firebase"
+import { collection, addDoc } from "firebase/firestore"
+import { useAuth } from "../hooks/useAuth"
 
 const COLORS = {
   background: "#ededed",
@@ -34,9 +37,35 @@ const paymentMethods = [
 // Add type for payment routes
 type PaymentRoute = '/credit-card' | '/paypal' | '/gcash';
 
+// Add this constant at the top with other constants
+const LOCATIONS = [
+  "Davao Airport",
+  "Davao City Proper",
+  "SM Lanang Premier",
+  "Abreeza Mall",
+  "GMall Davao",
+  "Victoria Plaza",
+  "NCCC Mall",
+  "Matina Town Square",
+  "People's Park",
+  "Jack's Ridge"
+]
+
+// Add rental durations constant
+const DURATIONS = [
+  { id: 1, days: 1, label: '1 Day' },
+  { id: 2, days: 2, label: '2 Days' },
+  { id: 3, days: 3, label: '3 Days' },
+  { id: 4, days: 4, label: '4 Days' },
+]
+
+// Add this type for payment methods
+type PaymentMethod = 'gcash' | 'paypal' | 'credit-card';
+
 export default function CheckoutScreen() {
   const { carId } = useLocalSearchParams<{ carId: string }>()
   const car = cars.find(c => c.id === carId)
+  const { user } = useAuth()
 
   const [selectedAddOns, setSelectedAddOns] = useState(addOns)
   // Update payment state to use string IDs
@@ -44,6 +73,18 @@ export default function CheckoutScreen() {
   const [pickupDate, setPickupDate] = useState("Dec 25, 2024")
   const [dropoffDate, setDropoffDate] = useState("Dec 28, 2024")
   const [pickupLocation, setPickupLocation] = useState("Davao Airport")
+  // Add state for rental duration
+  const [selectedDuration, setSelectedDuration] = useState(DURATIONS[0])
+
+  // Add these states
+  const [showLocationModal, setShowLocationModal] = useState(false)
+  const [locationSearch, setLocationSearch] = useState("")
+  const [filteredLocations, setFilteredLocations] = useState(LOCATIONS)
+
+  // Add these states at the top of your component
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+  const [errorTitle, setErrorTitle] = useState("")
 
   if (!car) {
     return (
@@ -53,9 +94,9 @@ export default function CheckoutScreen() {
     )
   }
 
+  // Update the price calculations
   const basePrice = car.pricePerDay
-  const days = 3
-  const subtotal = basePrice * days
+  const subtotal = basePrice * selectedDuration.days // Use selected duration
   const addOnTotal = selectedAddOns.filter((addon) => addon.selected).reduce((sum, addon) => sum + addon.price, 0)
   const tax = (subtotal + addOnTotal) * 0.12
   const total = subtotal + addOnTotal + tax
@@ -67,23 +108,85 @@ export default function CheckoutScreen() {
   }
 
   // Update handleConfirmBooking function
-  const handleConfirmBooking = () => {
-    if (!selectedPayment) {
-      Alert.alert("Error", "Please select a payment method")
+  const handleConfirmBooking = async () => {
+    if (!user) {
+      setErrorTitle("Login Required")
+      setErrorMessage("Please login to make a booking")
+      setShowErrorModal(true)
       return
     }
 
-    // Map payment method to route with amount parameter
-    const paymentRoutes: Record<string, string> = {
-      'credit-card': `/credit-card?amount=${total.toFixed(2)}`,
-      'paypal': `/paypal?amount=${total.toFixed(2)}`,
-      'gcash': `/gcash?amount=${total.toFixed(2)}`
+    if (!selectedPayment) {
+      setErrorTitle("Payment Method Required")
+      setErrorMessage("Please select a payment method to continue")
+      setShowErrorModal(true)
+      return
     }
 
-    const route = paymentRoutes[selectedPayment]
-    if (route) {
-      router.push(route as any)
+    if (!selectedDuration) {
+      setErrorTitle("Duration Required")
+      setErrorMessage("Please select your rental duration")
+      setShowErrorModal(true)
+      return
     }
+
+    try {
+      // Create booking data
+      const bookingData = {
+        userId: user.id,
+        carId: car.id,
+        carName: car.name,
+        carImage: car.image,
+        duration: selectedDuration.days,
+        location: pickupLocation,
+        status: "Pending",
+        price: total,
+        selectedAddOns: selectedAddOns.filter(addon => addon.selected),
+        createdAt: new Date(),
+      }
+
+      // Save booking to Firestore first
+      const bookingRef = await addDoc(collection(db, "bookings"), bookingData)
+
+      // Navigate with booking ID and amount
+      const navigateToPayment = (method: PaymentMethod) => {
+        router.push({
+          pathname: `/${method}`,
+          params: { 
+            amount: total.toString(),
+            bookingId: bookingRef.id
+          }
+        })
+      }
+
+      switch (selectedPayment) {
+        case 'gcash':
+          navigateToPayment('gcash')
+          break
+        case 'paypal':
+          navigateToPayment('paypal')
+          break
+        case 'credit-card':
+          navigateToPayment('credit-card')
+          break
+        default:
+          Alert.alert("Error", "Invalid payment method")
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error)
+      setErrorTitle("Booking Error")
+      setErrorMessage("Could not create booking. Please try again.")
+      setShowErrorModal(true)
+    }
+  }
+
+  // Add this function to filter locations
+  const filterLocations = (text: string) => {
+    const filtered = LOCATIONS.filter(location =>
+      location.toLowerCase().includes(text.toLowerCase())
+    )
+    setFilteredLocations(filtered)
+    setLocationSearch(text)
   }
 
   return (
@@ -110,29 +213,49 @@ export default function CheckoutScreen() {
           </View>
         </View>
 
-        {/* Date & Location */}
+        {/* Duration & Location */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Date & Location</Text>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Pickup Date & Time</Text>
-            <TouchableOpacity style={styles.dateInput}>
-              <Ionicons name="calendar" size={20} color={COLORS.primary} />
-              <Text style={styles.dateText}>{pickupDate}</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Drop-off Date & Time</Text>
-            <TouchableOpacity style={styles.dateInput}>
-              <Ionicons name="calendar" size={20} color={COLORS.primary} />
-              <Text style={styles.dateText}>{dropoffDate}</Text>
-            </TouchableOpacity>
+          <Text style={styles.sectionTitle}>Duration & Location</Text>
+          
+          <Text style={styles.inputLabel}>Rental Duration</Text>
+          <View style={styles.durationContainer}>
+            {DURATIONS.map((duration) => (
+              <TouchableOpacity
+                key={duration.id}
+                style={[
+                  styles.durationBox,
+                  selectedDuration.id === duration.id && styles.selectedDurationBox
+                ]}
+                onPress={() => setSelectedDuration(duration)}
+              >
+                <Text style={[
+                  styles.durationDays,
+                  selectedDuration.id === duration.id && styles.selectedDurationText
+                ]}>
+                  {duration.days}
+                </Text>
+                <Text style={[
+                  styles.durationLabel,
+                  selectedDuration.id === duration.id && styles.selectedDurationText
+                ]}>
+                  {duration.days === 1 ? 'Day' : 'Days'}
+                </Text>
+                <Text style={[
+                  styles.durationPrice,
+                  selectedDuration.id === duration.id && styles.selectedDurationText
+                ]}>
+                  ${(car.pricePerDay * duration.days).toFixed(0)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>Pickup Location</Text>
-            <TouchableOpacity style={styles.locationInput}>
+            <TouchableOpacity 
+              style={styles.locationInput}
+              onPress={() => setShowLocationModal(true)}
+            >
               <Ionicons name="location" size={20} color={COLORS.primary} />
               <Text style={styles.locationText}>{pickupLocation}</Text>
               <Ionicons name="chevron-down" size={20} color="#666666" />
@@ -196,7 +319,7 @@ export default function CheckoutScreen() {
           <Text style={styles.sectionTitle}>Price Breakdown</Text>
           <View style={styles.priceBreakdown}>
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>Car rental ({days} days)</Text>
+              <Text style={styles.priceLabel}>Car rental ({selectedDuration.days} days)</Text>
               <Text style={styles.priceValue}>${subtotal}</Text>
             </View>
             {selectedAddOns
@@ -222,14 +345,86 @@ export default function CheckoutScreen() {
       {/* Confirm Button */}
       <View style={styles.confirmContainer}>
         <TouchableOpacity 
-          style={styles.confirmButton} 
+          style={[
+            styles.continueButton,
+            (!selectedPayment || !selectedDuration) && styles.disabledButton
+          ]}
           onPress={handleConfirmBooking}
+          disabled={!selectedPayment || !selectedDuration}
         >
-          <Text style={styles.confirmButtonText}>
-            Continue to Payment - ${total.toFixed(2)}
+          <Text style={styles.continueButtonText}>
+            Continue to Payment • ${total.toFixed(2)}
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Location Modal */}
+      <Modal
+        visible={showLocationModal}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowLocationModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.locationModal}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select Location</Text>
+              <TouchableOpacity onPress={() => setShowLocationModal(false)}>
+                <Ionicons name="close" size={24} color={COLORS.black} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.searchBox}>
+              <Ionicons name="search" size={20} color={COLORS.gray} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search location..."
+                value={locationSearch}
+                onChangeText={filterLocations}
+              />
+            </View>
+            <FlatList
+              data={filteredLocations}
+              keyExtractor={(item) => item}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.locationItem}
+                  onPress={() => {
+                    setPickupLocation(item)
+                    setShowLocationModal(false)
+                  }}
+                >
+                  <Ionicons name="location" size={20} color={COLORS.primary} />
+                  <Text style={styles.locationItemText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+
+      {/* Error Modal */}
+      <Modal
+        visible={showErrorModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowErrorModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.errorModal}>
+            <View style={styles.errorIconContainer}>
+              <Ionicons name="alert-circle" size={40} color={COLORS.secondary} />
+            </View>
+            <Text style={styles.errorTitle}>{errorTitle}</Text>
+            <Text style={styles.errorMessage}>{errorMessage}</Text>
+            <TouchableOpacity 
+              style={styles.errorButton}
+              onPress={() => setShowErrorModal(false)}
+            >
+              <Text style={styles.errorButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   )
 }
@@ -459,15 +654,179 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "#e0e0e0",
   },
-  confirmButton: {
+  continueButton: {
     backgroundColor: COLORS.secondary,
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: "center",
   },
-  confirmButtonText: {
+  continueButtonText: {
     color: COLORS.white,
     fontSize: 18,
     fontWeight: "600",
+  },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  locationModal: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    maxHeight: '80%',
+  },
+  errorModal: {
+    backgroundColor: COLORS.white,
+    borderRadius: 20,
+    padding: 24,
+    width: '85%',
+    alignItems: 'center',
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  errorIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: `${COLORS.secondary}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.black,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: COLORS.gray,
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  errorButton: {
+    backgroundColor: COLORS.secondary,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    width: '100%',
+  },
+  errorButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.black,
+  },
+  searchBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  locationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.lightGray,
+  },
+  locationItemText: {
+    marginLeft: 12,
+    fontSize: 16,
+    color: COLORS.black,
+  },
+  durationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  durationBox: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: "#f8f9fa",
+    borderWidth: 1,
+    borderColor: COLORS.lightGray,
+    marginHorizontal: 4,
+  },
+  selectedDurationBox: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  durationDays: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: COLORS.black,
+  },
+  durationLabel: {
+    fontSize: 14,
+    color: COLORS.gray,
+  },
+  durationPrice: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  selectedDurationText: {
+    color: COLORS.white,
+  },
+  paymentOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  selectedPayment: {
+    borderColor: '#1054CF',
+    backgroundColor: '#f0f6ff',
+  },
+  paymentLogo: {
+    width: 80,
+    height: 24,
+    marginRight: 12,
+  },
+  paymentText: {
+    fontSize: 16,
+    color: '#333333',
+    marginLeft: 12,
   },
 })

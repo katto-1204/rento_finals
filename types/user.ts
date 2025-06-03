@@ -7,6 +7,7 @@ export interface User {
   isAdmin: boolean;
   createdAt: Date;
   updatedAt: Date;
+  displayName: string | null;
 }
 
 export interface UserProfile extends User {
