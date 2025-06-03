@@ -18,8 +18,8 @@ const carRentalLocations: Location[] = [
       name: "SM Lanang Premier",
       address: "J.P. Laurel Ave, Lanang, Davao City",
       cars: 15,
-      x: 65,
-      y: 45,
+      x: 75,
+      y: 30,
       type: "premium"
     },
     {
@@ -27,7 +27,7 @@ const carRentalLocations: Location[] = [
       name: "Abreeza Mall",
       address: "J.P. Laurel Ave, Bajada, Davao City",
       cars: 12,
-      x: 45,
+      x: 35,
       y: 55,
       type: "standard"
     },
@@ -45,7 +45,7 @@ const carRentalLocations: Location[] = [
       name: "Gaisano Mall",
       address: "Ilustre St, Davao City",
       cars: 10,
-      x: 40,
+      x: 80,
       y: 60,
       type: "standard"
     },
@@ -54,7 +54,7 @@ const carRentalLocations: Location[] = [
       name: "Victoria Plaza",
       address: "R. Magsaysay Ave, Davao City",
       cars: 7,
-      x: 38,
+      x: 18,
       y: 58,
       type: "standard"
     },
@@ -64,7 +64,7 @@ const carRentalLocations: Location[] = [
       address: "Monteverde Ave, Davao City",
       cars: 9,
       x: 42,
-      y: 52,
+      y: 42,
       type: "standard"
     },
     {

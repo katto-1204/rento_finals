@@ -81,32 +81,60 @@ export default function SearchScreen() {
     </TouchableOpacity>
   )
 
+  const getCardStyle = () => ({
+    ...styles.carCard,
+    maxWidth: selectedBrand ? width - 32 : (width - 40) / 2,
+  });
+
   const renderCarItem = ({ item }: { item: any }) => (
     <TouchableOpacity 
-      style={styles.carCard} 
+      style={getCardStyle()} 
       onPress={() => router.push({
         pathname: "/car-details/[id]",
         params: { id: item.id }
       })}
       activeOpacity={0.7}
     >
-      <Image source={{ uri: item.image }} style={styles.carImage} />
-      <View style={styles.carInfo}>
-        <Text style={styles.carName}>{item.name}</Text>
-        <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
-        <View style={styles.carDetails}>
-          <Text style={styles.carBrand}>{item.brand}</Text>
-          <Text style={styles.carLocation}>{item.location}</Text>
+      <View style={styles.cardHeader}>
+        <View style={styles.locationTag}>
+          <Ionicons name="location" size={16} color="#fff" />
+          <Text style={styles.locationText}>Davao City</Text>
         </View>
-        <View style={styles.carSpecs}>
-          <Text style={styles.carSpec}>{item.type}</Text>
-          <Text style={styles.carSpec}>•</Text>
-          <Text style={styles.carSpec}>{item.fuel}</Text>
-          <Text style={styles.carSpec}>•</Text>
-          <Text style={styles.carSpec}>{item.seats} seats</Text>
+        <TouchableOpacity style={styles.favoriteButton}>
+          <Ionicons name="heart-outline" size={20} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <Image source={{ uri: item.image }} style={styles.carImage} />
+      
+      <View style={styles.cardContent}>
+        <View style={styles.nameRow}>
+          <Text style={styles.carName}>{item.name}</Text>
+          <Text style={styles.carPrice}>${item.pricePerDay}/day</Text>
+        </View>
+        
+        <View style={styles.detailsRow}>
+          <View style={styles.ratingContainer}>
+            <Ionicons name="star" size={16} color="#FFB700" />
+            <Text style={styles.ratingText}>4.5</Text>
+          </View>
+          
+          <View style={styles.seatsContainer}>
+            <Ionicons name="people" size={16} color="#fff" />
+            <Text style={styles.seatsText}>{item.seats} Seats</Text>
+          </View>
+        </View>
+
+        <View style={styles.bottomRow}>
+          <View style={styles.conditionTag}>
+            <Text style={styles.conditionText}>USED</Text>
+          </View>
+          
+          <View style={styles.arrowButton}>
+            <Ionicons name="arrow-forward" size={20} color="#FFB700" />
+          </View>
         </View>
       </View>
-      <Ionicons name="chevron-forward" size={20} color="#4169e1" />
     </TouchableOpacity>
   )
 
@@ -128,10 +156,11 @@ export default function SearchScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Top Brands</Text>
           <FlatList
+            key="brands"
             data={brands}
             renderItem={renderBrandItem}
             keyExtractor={(item) => item.id.toString()}
-            numColumns={4}
+            numColumns={4}  // Changed to 4 columns
             scrollEnabled={false}
             contentContainerStyle={styles.brandsGrid}
           />
@@ -156,11 +185,14 @@ export default function SearchScreen() {
           </View>
 
           <FlatList
+            key={selectedBrand ? 'single' : 'double'}
             data={filteredCars}
             renderItem={renderCarItem}
             keyExtractor={(item) => item.id.toString()}
+            numColumns={selectedBrand ? 1 : 2}  // Changed from 3 to 2
             scrollEnabled={false}
             showsVerticalScrollIndicator={false}
+            columnWrapperStyle={selectedBrand ? null : styles.carRow}
           />
         </View>
       </ScrollView>
@@ -188,17 +220,15 @@ const styles = StyleSheet.create({
     color: "#000000",
   },
   devsButton: {
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    backgroundColor: "#1054CF", // Updated blue
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#1054CF',
   },
   devsButtonText: {
-    color: '#1054CF',
+    color: "#ffffff",
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: "600",
   },
   searchContainer: {
     paddingHorizontal: 20,
@@ -253,18 +283,20 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   brandsGrid: {
-    gap: 15,
+    paddingHorizontal: 4,
   },
   brandCard: {
     flex: 1,
     aspectRatio: 1,
     backgroundColor: "#f8f9fa",
-    borderRadius: 12,
+    borderRadius: 50, // Make it circular
     alignItems: "center",
     justifyContent: "center",
-    marginHorizontal: 5,
-    borderWidth: 1,           // 1px for consistency
+    margin: 8,
+    borderWidth: 1,
     borderColor: "transparent",
+    maxWidth: (width - 80) / 4, // Adjust for 4 columns
+    height: (width - 80) / 4, // Make it square
   },
   selectedBrandCard: {
     backgroundColor: "#e3f2fd",
@@ -272,12 +304,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,         // 1px solid
   },
   brandLogoImg: {
-    width: 36,
-    height: 36,
-    marginBottom: 8,
+    width: 28, // Smaller logo
+    height: 28, // Smaller logo
+    marginBottom: 4, // Reduced margin
   },
   brandName: {
-    fontSize: 12,
+    fontSize: 10, // Smaller font
     fontWeight: "600",
     color: "#666666",
     textAlign: "center",
@@ -305,72 +337,116 @@ const styles = StyleSheet.create({
     color: "#999999",
   },
   carCard: {
-    flexDirection: "row",
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    alignItems: "center",
+    flex: 1,
+    backgroundColor: '#1054CF',
+    borderRadius: 16,
+    margin: 8,
+    overflow: 'hidden',
+    elevation: 5,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "#f0f0f0",
+    height: 280, // Reduced from 260 to 240
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 8, // Reduced from 12 to 8
+  },
+  locationTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  locationText: {
+    color: '#fff',
+    fontSize: 10,
+    marginLeft: 4,
+  },
+  favoriteButton: {
+    padding: 4,
   },
   carImage: {
-    width: 100,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 16,
+    width: '100%',
+    height: 100, // Reduced from 120 to 100
+    resizeMode: 'cover',
   },
-  carInfo: {
+  cardContent: {
+    padding: 12,
     flex: 1,
+    justifyContent: 'flex-start', // Changed from 'space-between' to 'flex-start'
+  },
+  nameRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8, // Increased from 8 to 12
   },
   carName: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000000",
-    marginBottom: 4,
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   carPrice: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#4169e1",
-    marginBottom: 6,
+    fontWeight: 'bold',
+    color: '#FFB700',
   },
-  carDetails: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 4,
+  detailsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8, // Changed from marginVertical to marginBottom
+    gap: 16,
   },
-  carBrand: {
-    fontSize: 14,
-    color: "#666666",
-    fontWeight: "500",
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    // Removed marginTop and paddingTop
   },
-  carLocation: {
-    fontSize: 14,
-    color: "#666666",
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  carSpecs: {
-    flexDirection: "row",
-    alignItems: "center",
+  ratingText: {
+    color: '#fff',
+    marginLeft: 2,
+    fontSize: 12, // Reduced from 14 to 12
   },
-  carSpec: {
+  conditionTag: {
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  conditionText: {
+    color: '#fff',
     fontSize: 12,
-    color: "#999999",
-    marginRight: 6,
+    fontWeight: '500',
   },
-  button: {
-    backgroundColor: "#1054CF",
+  seatsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  activeText: {
-    color: "#FFB700",
+  seatsText: {
+    color: '#fff',
+    marginLeft: 2,
+    fontSize: 12, // Reduced from 14 to 12
   },
-  
+  arrowButton: {
+    backgroundColor: 'rgba(255, 183, 0, 0.2)',
+    padding: 8,
+    borderRadius: 16,
+  },
+  carRow: {
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+  },
 })

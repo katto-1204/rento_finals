@@ -68,9 +68,9 @@ export const cars = [
   },
   {
     id: "5",
-    name: "Mercedes GLE",
+    name: "Mercedes Benz",
     brand: "Mercedes",
-    model: "GLE",
+    model: "Benz GLE",
     year: 2023,
     pricePerDay: 130,
     location: "Davao City",
@@ -84,9 +84,9 @@ export const cars = [
   },
   {
     id: "6",
-    name: "Mercedes AMG GT",
+    name: "Mercedes A-Class",
     brand: "Mercedes",
-    model: "AMG GT",
+    model: "A-Class",
     year: 2023,
     pricePerDay: 200,
     location: "Davao City",
@@ -168,7 +168,7 @@ export const cars = [
   },
   {
     id: "11",
-    name: "Toyota Land Cruiser",
+    name: "Toyota L.Cruiser",
     brand: "Toyota",
     model: "Land Cruiser",
     year: 2023,
