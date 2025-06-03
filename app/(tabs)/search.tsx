@@ -15,8 +15,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
-import { cars } from "../../data/cars"
 import DummyMap from '../../components/DummyMap';
+import { cars } from "../../data/cars";
 
 const { width } = Dimensions.get("window")
 
@@ -105,7 +105,7 @@ export default function SearchScreen() {
         </TouchableOpacity>
       </View>
 
-      <Image source={{ uri: item.image }} style={styles.carImage} />
+<Image source={item.image} style={styles.carImage} />
       
       <View style={styles.cardContent}>
         <View style={styles.nameRow}>

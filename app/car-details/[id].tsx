@@ -27,21 +27,6 @@ type Review = {
 
 const { width } = Dimensions.get("window")
 
-const carSpecs = [
-  { icon: "speedometer", label: "Mileage", value: "25,000 km" },
-  { icon: "car", label: "Fuel Type", value: "Gasoline" },
-  { icon: "people", label: "Seats", value: "5 passengers" },
-  { icon: "cog", label: "Transmission", value: "Automatic" },
-  { icon: "calendar", label: "Year", value: "2023" },
-  { icon: "shield-checkmark", label: "Insurance", value: "Included" },
-]
-
-const formatUserName = (email: string) => {
-  const name = email.split('@')[0]
-  return name.charAt(0).toUpperCase() + name.slice(1)
-}
-
-// Add this near the top of the file, after the imports
 const brandLogos = {
   bmw: require('../../assets/brandlogos/bmw.png'),
   mercedes: require('../../assets/brandlogos/mercedes.png'),
@@ -61,6 +46,14 @@ const getBrandLogo = (brand: string) => {
     console.error(`Could not load logo for brand: ${brand}`, error);
     return null;
   }
+};
+
+// Add this function before the CarDetailsScreen component
+const formatUserName = (email: string) => {
+  if (!email) return 'Anonymous';
+  // Extract the part before @ and capitalize first letter
+  const name = email.split('@')[0];
+  return name.charAt(0).toUpperCase() + name.slice(1);
 };
 
 export default function CarDetailsScreen() {
@@ -169,7 +162,7 @@ export default function CarDetailsScreen() {
               )}
             </View>
           </View>
-          <Image source={{ uri: car.image }} style={styles.carImage} />
+          <Image source={car.image} style={styles.carImage} />
           
           {/* Image Indicators */}
           <View style={styles.imageIndicators}>
@@ -189,37 +182,37 @@ export default function CarDetailsScreen() {
         <View style={styles.specsContainer}>
           <View style={styles.specsGrid}>
             <View style={styles.specItem}>
-              <Ionicons name="speedometer" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[0].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[0].label}</Text>
+              <Ionicons name="calendar" size={24} color="#FFB700" />
+              <Text style={styles.specValue}>{car.year}</Text>
+              <Text style={styles.specLabel}>Year</Text>
             </View>
             <View style={styles.specItem}>
               <Ionicons name="car" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[1].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[1].label}</Text>
+              <Text style={styles.specValue}>{car.fuel}</Text>
+              <Text style={styles.specLabel}>Fuel Type</Text>
             </View>
             <View style={styles.specItem}>
               <Ionicons name="people" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[2].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[2].label}</Text>
+              <Text style={styles.specValue}>{car.seats} seats</Text>
+              <Text style={styles.specLabel}>Capacity</Text>
             </View>
           </View>
 
           <View style={styles.specsGrid}>
             <View style={styles.specItem}>
-              <Ionicons name="cog" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[3].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[3].label}</Text>
+              <Ionicons name="car-sport" size={24} color="#FFB700" />
+              <Text style={styles.specValue}>{car.type}</Text>
+              <Text style={styles.specLabel}>Type</Text>
             </View>
             <View style={styles.specItem}>
-              <Ionicons name="calendar" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[4].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[4].label}</Text>
+              <Ionicons name="location" size={24} color="#FFB700" />
+              <Text style={styles.specValue}>{car.location}</Text>
+              <Text style={styles.specLabel}>Location</Text>
             </View>
             <View style={styles.specItem}>
-              <Ionicons name="shield-checkmark" size={24} color="#FFB700" />
-              <Text style={styles.specValue}>{carSpecs[5].value}</Text>
-              <Text style={styles.specLabel}>{carSpecs[5].label}</Text>
+              <Ionicons name="star" size={24} color="#FFB700" />
+              <Text style={styles.specValue}>{car.rating}</Text>
+              <Text style={styles.specLabel}>Rating</Text>
             </View>
           </View>
         </View>
