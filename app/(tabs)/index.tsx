@@ -157,7 +157,9 @@ export default function HomeScreen() {
   })
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [isNewLogin, setIsNewLogin] = useState(false)
-  const [timeLeft, setTimeLeft] = useState(600) // 600 seconds = 10 minutes
+  const [timeLeft, setTimeLeft] = useState(180) // 180 seconds = 3 minutes
+  const [searchQuery, setSearchQuery] = useState("")
+  const [hasNotifications, setHasNotifications] = useState(false)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -202,15 +204,16 @@ export default function HomeScreen() {
       return () => clearInterval(timer)
     } else if (timeLeft === 0) {
       setShowPromoModal(false)
-      setTimeLeft(600) // Reset timer for next time
+      setTimeLeft(180) // Reset timer for next time
     }
   }, [showPromoModal, timeLeft])
 
   // Add this helper function to format the time
   const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
+    const hours = Math.floor(seconds / 3600)
+    const minutes = Math.floor((seconds % 3600) / 60)
     const remainingSeconds = seconds % 60
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+    return `${hours.toString().padStart(2, '0')} : ${minutes.toString().padStart(2, '0')} : ${remainingSeconds.toString().padStart(2, '0')}`
   }
 
   // Update the renderCarCard function
@@ -287,8 +290,29 @@ export default function HomeScreen() {
               <Text style={styles.flag}>🇵🇭</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.devsButton} onPress={() => router.push("/developers")}>
-            <Text style={styles.devsButtonText}>Devs</Text>
+          <TouchableOpacity 
+            style={styles.notificationButton} 
+            onPress={() => router.push("/notifications")}
+          >
+            <Ionicons 
+              name={hasNotifications ? "notifications" : "notifications-outline"} 
+              size={24} 
+              color="#1054CF"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Search Bar - New Component */}
+        <View style={styles.searchContainer}>
+          <TouchableOpacity 
+            style={styles.searchBar}
+            onPress={() => router.push("/(tabs)/search")}
+          >
+            <Ionicons name="search" size={20} color="#666666" />
+            <Text style={styles.searchPlaceholder}>Search cars, brands, models...</Text>
+            <View style={styles.searchButton}>
+              <Ionicons name="options" size={20} color="#1054CF" />
+            </View>
           </TouchableOpacity>
         </View>
 
@@ -441,14 +465,14 @@ export default function HomeScreen() {
             >
               <Ionicons name="close" size={24} color="#000000" />
             </TouchableOpacity>
-            
+
             <View style={styles.timerContainer}>
-              <Ionicons name="time" size={20} color="#FFB700" />
+              <Ionicons name="time-outline" size={24} color="#1054CF" />
               <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
             </View>
 
             <Image 
-              source={require('../../assets/modal_360.gif')}
+              source={require('../../assets/adv cars.gif')}
               style={styles.promoImage}
               resizeMode="contain"
             />
@@ -508,6 +532,22 @@ const styles = StyleSheet.create({
   flag: {
     fontSize: 16,
   },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 2,
+  },
   devsButton: {
     backgroundColor: "#1054CF", // Updated blue
     paddingHorizontal: 16,
@@ -518,6 +558,30 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 14,
     fontWeight: "600",
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 15,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+  },
+  searchPlaceholder: {
+    flex: 1,
+    marginLeft: 12,
+    fontSize: 14,
+    color: "#666666",
+  },
+  searchButton: {
+    padding: 4,
   },
   couponSection: {
     paddingHorizontal: 20,
@@ -823,14 +887,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   timerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
+    position: 'absolute',
+    top: 30, // Move down from top
+    alignSelf: 'center', // Center horizontally
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
+    zIndex: 1,
+    borderWidth: 1,
+    borderColor: '#1054CF',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   timerText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#FFB700",
+    color: '#1054CF',
+    fontWeight: 'bold',
+    fontSize: 20,
     marginLeft: 8,
+    letterSpacing: 2,
   },
 })

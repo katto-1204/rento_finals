@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import { cars } from "../../data/cars"
+import DummyMap from '../../components/DummyMap';
 
 const { width } = Dimensions.get("window")
 
@@ -113,21 +114,15 @@ export default function SearchScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Find Cars</Text>
+        <TouchableOpacity 
+          style={styles.devsButton} 
+          onPress={() => router.push("/developers")}
+        >
+          <Text style={styles.devsButtonText}>Devs</Text>
+        </TouchableOpacity>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={20} color="#666666" />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search cars, brands, models..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-        </View>
 
         {/* Top Brands */}
         <View style={styles.section}>
@@ -145,10 +140,7 @@ export default function SearchScreen() {
         {/* Map View */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Map View</Text>
-          <View style={styles.mapContainer}>
-            <Text style={styles.mapPlaceholder}>Google Maps Integration</Text>
-            <Text style={styles.mapSubtext}>Interactive map showing car locations</Text>
-          </View>
+          <DummyMap />
         </View>
 
         {/* All Cars / Filtered Cars */}
@@ -182,6 +174,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#ededed",
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
@@ -191,6 +186,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#000000",
+  },
+  devsButton: {
+    backgroundColor: '#ffffff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#1054CF',
+  },
+  devsButtonText: {
+    color: '#1054CF',
+    fontSize: 14,
+    fontWeight: '500',
   },
   searchContainer: {
     paddingHorizontal: 20,
@@ -364,4 +372,5 @@ const styles = StyleSheet.create({
   activeText: {
     color: "#FFB700",
   },
+  
 })

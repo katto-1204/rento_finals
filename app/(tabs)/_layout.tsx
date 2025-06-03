@@ -6,38 +6,65 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginTop: 3,
+          fontWeight: '500',
+        },
         tabBarStyle: {
           position: 'absolute',
           bottom: 20,
-          left: 20,
-          right: 20,
-          elevation: 5,
-          backgroundColor: '#1054CF',
-          borderRadius: 25,
-          height: 70,
-          paddingBottom: 10,
+          left: 65,
+          right: 60,
+          backgroundColor: '#FFB700',
+          borderRadius: 45,
+          height: 80,
+          borderWidth: 1.5,
+          borderColor: '#1054CF',
+          paddingHorizontal: 19,
           paddingTop: 10,
-          borderTopWidth: 0,
+          paddingBottom: 10,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          elevation: 3,
         },
-        tabBarActiveTintColor: '#FFB700',
-        tabBarInactiveTintColor: '#cccccc',
+        tabBarActiveTintColor: '#1054CF', // Changed to blue
+        tabBarInactiveTintColor: 'rgba(0, 0, 0, 0.7)', // Dark with opacity for both icon and text
+        tabBarItemStyle: {
+          marginHorizontal: -15,
+          paddingTop: 0,
+        }
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? "home" : "home-outline"} 
+              size={29} 
+              color={color} 
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
-          title: "Search",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="search" size={24} color={color} />
+          title: "Cars",
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? "car" : "car-outline"} 
+              size={34} 
+              color={color} 
+            />
           ),
         }}
       />
@@ -45,17 +72,12 @@ export default function TabLayout() {
         name="bookings"
         options={{
           title: "Bookings",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="calendar" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Alerts",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="notifications" size={24} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? "calendar" : "calendar-outline"} 
+              size={29} 
+              color={color} 
+            />
           ),
         }}
       />
@@ -63,8 +85,12 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons 
+              name={focused ? "person" : "person-outline"} 
+              size={29} 
+              color={color} 
+            />
           ),
         }}
       />

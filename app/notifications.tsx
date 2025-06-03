@@ -1,8 +1,8 @@
 "use client"
 
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, FlatList } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
+import { router } from "expo-router"
 
 const notifications = [
   {
@@ -89,31 +89,36 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
+        <TouchableOpacity 
+          style={styles.backButton}
+          onPress={() => router.push("/(tabs)")}
+        >
+          <Ionicons name="arrow-back" size={24} color="#1054CF" />
+        </TouchableOpacity>
         <Text style={styles.title}>Notifications</Text>
+      </View>
+      
+      <View style={styles.content}>
         {unreadCount > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadBadgeText}>{unreadCount}</Text>
+          <View style={styles.actionContainer}>
+            <TouchableOpacity style={styles.markAllReadButton}>
+              <Text style={styles.markAllReadText}>Mark all as read</Text>
+            </TouchableOpacity>
           </View>
         )}
+
+        {notifications.length === 0 ? (
+          <Text style={styles.emptyText}>No notifications yet</Text>
+        ) : (
+          <FlatList
+            data={notifications}
+            renderItem={renderNotificationItem}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
-
-      {unreadCount > 0 && (
-        <View style={styles.actionContainer}>
-          <TouchableOpacity style={styles.markAllReadButton}>
-            <Text style={styles.markAllReadText}>Mark all as read</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <FlatList
-          data={notifications}
-          renderItem={renderNotificationItem}
-          keyExtractor={(item) => item.id.toString()}
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-        />
-      </ScrollView>
     </SafeAreaView>
   )
 }
@@ -126,29 +131,42 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 20,
+    padding: 20,
+    backgroundColor: "#ffffff",
     borderBottomWidth: 1,
     borderBottomColor: "#e0e0e0",
+  },
+  backButton: {
+    marginRight: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#ffffff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 2,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#000000",
+  },
+  content: {
     flex: 1,
+    padding: 20,
   },
-  unreadBadge: {
-    backgroundColor: "#ff4444",
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 24,
-    alignItems: "center",
-  },
-  unreadBadgeText: {
-    color: "#ffffff",
-    fontSize: 12,
-    fontWeight: "600",
+  emptyText: {
+    textAlign: "center",
+    color: "#666666",
+    marginTop: 40,
+    fontSize: 16,
   },
   actionContainer: {
     paddingHorizontal: 20,
@@ -163,10 +181,6 @@ const styles = StyleSheet.create({
     color: "#4169e1",
     fontSize: 14,
     fontWeight: "600",
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
   },
   notificationCard: {
     flexDirection: "row",
