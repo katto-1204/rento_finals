@@ -139,26 +139,27 @@ export default function HomeScreen() {
   const [searchQuery, setSearchQuery] = useState("")
   const [hasNotifications, setHasNotifications] = useState(false)
 
+  // Add this state to track first render
+  const [isFirstRender, setIsFirstRender] = useState(true)
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // User just logged in
-        const lastLoginTime = await AsyncStorage.getItem('lastLoginTime')
-        const currentTime = new Date().getTime()
-        
-        if (!lastLoginTime || (currentTime - parseInt(lastLoginTime)) > 24 * 60 * 60 * 1000) {
-          // Show promo if first login or last login was more than 24 hours ago
-          setShowPromoModal(true)
-          await AsyncStorage.setItem('lastLoginTime', currentTime.toString())
-        }
+        setShowPromoModal(true)
+        setTimeLeft(180) // Reset timer
       } else {
-        // User logged out - reset the promo flag
-        await AsyncStorage.removeItem('lastLoginTime')
         setShowPromoModal(false)
       }
     })
 
     return () => unsubscribe()
+  }, [])
+
+  // Add this useEffect to reset first render state on unmount
+  useEffect(() => {
+    return () => {
+      setIsFirstRender(true)
+    }
   }, [])
 
   useEffect(() => {

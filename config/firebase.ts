@@ -34,5 +34,8 @@ export const testFirestoreConnection = async () => {
   } catch (error) {
     console.error("Firestore connection test failed:", error);
     return false;
+
   }
-};
+}
+
+export default app;
