@@ -36,7 +36,7 @@ const coupons = [
 // Update featuredCars type
 const featuredCars = [
     {
-    id: "mustang",
+    id: "21",
     name: "Ford Mustang",
     brand: "Ford",
     model: "GT",
@@ -51,7 +51,7 @@ const featuredCars = [
     createdAt: new Date(),
   },
     {
-    id: "nsx",
+    id: "15",
     name: "Honda NSX",
     brand: "Honda",
     model: "NSX Type S",
@@ -66,7 +66,7 @@ const featuredCars = [
     createdAt: new Date(),
   },
   {
-    id: "landcruiser",
+    id: "11",
     name: "Land Cruiser",
     brand: "Toyota",
     model: "300 Series",
@@ -81,7 +81,7 @@ const featuredCars = [
     createdAt: new Date(),
   },
   {
-    id: "gtr",
+    id: "17",
     name: "Nissan GT-R",
     brand: "Nissan",
     model: "R35 NISMO",
@@ -97,7 +97,7 @@ const featuredCars = [
     
   },
     {
-    id: "supra",
+    id: "12",
     name: "Toyota Supra",
     brand: "Toyota",
     model: "GR Supra",

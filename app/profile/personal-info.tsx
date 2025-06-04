@@ -147,7 +147,7 @@ export default function PersonalInfoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ededed",
+    backgroundColor: "#1054CF",
   },
   header: {
     flexDirection: "row",
@@ -156,16 +156,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
-    color: "#000000",
+    color: "#ffffff",
   },
   editText: {
     fontSize: 16,
-    color: "#1054CF",
+    color: "#FFB700",
     fontWeight: "600",
   },
   content: {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 30,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   avatar: {
     width: 120,
@@ -209,21 +209,23 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000000",
+    color: "#ffffff",
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: "#FFB700",
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    backgroundColor: "#ffffff",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    color: "#ffffff",
   },
   disabledInput: {
-    backgroundColor: "#f8f9fa",
-    color: "#666666",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    color: "rgba(255, 255, 255, 0.6)",
   },
   dateInput: {
     flexDirection: "row",
@@ -247,10 +249,11 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   saveButton: {
-    backgroundColor: "#1054CF",
+    backgroundColor: "#FFB700",
     paddingVertical: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     alignItems: "center",
+    marginTop: 20,
   },
   saveButtonText: {
     color: "#ffffff",
