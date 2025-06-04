@@ -286,12 +286,15 @@ export default function SearchScreen() {
             data={filteredCars}
             renderItem={renderCarItem}
             keyExtractor={(item) => item.id.toString()}
-            numColumns={selectedBrand ? 1 : 2}  // Changed from 3 to 2
+            numColumns={selectedBrand ? 1 : 2}
             scrollEnabled={false}
             showsVerticalScrollIndicator={false}
             columnWrapperStyle={selectedBrand ? null : styles.carRow}
           />
         </View>
+
+        {/* Add bottom spacing */}
+        <View style={styles.bottomSpacing} />
       </ScrollView>
 
       {/* Like Car Modal */}
@@ -599,5 +602,8 @@ const styles = StyleSheet.create({
     marginRight: -20,
     paddingHorizontal: 5,
     paddingTop: 10, // Reduced from 15
+  },
+  bottomSpacing: {
+    height: 80, // Adjust this value based on your tab bar height
   },
 })
