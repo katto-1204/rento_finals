@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { type User as FirebaseUser, onAuthStateChanged, signOut as firebaseSignOut } from "firebase/auth"
 import { doc, getDoc } from "firebase/firestore"
 import { auth, db } from "../config/firebase"
@@ -56,6 +56,26 @@ export function useAuth() {
 
   const isAdmin = user?.isAdmin || false
 
+  // Add this function to manually refresh user data
+  const refresh = useCallback(async () => {
+    if (auth.currentUser) {
+      try {
+        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid))
+        if (userDoc.exists()) {
+          const userData = userDoc.data() as User
+          setUser({
+            ...userData,
+            id: auth.currentUser.uid,
+            email: auth.currentUser.email || userData.email,
+            avatar: userData.avatar || auth.currentUser.photoURL, // Add this line
+          })
+        }
+      } catch (error) {
+        console.error("Error refreshing user data:", error)
+      }
+    }
+  }, [])
+
   return {
     user,
     firebaseUser,
@@ -63,5 +83,6 @@ export function useAuth() {
     signOut,
     isAuthenticated: !!user,
     isAdmin,
+    refresh, // <-- add this
   }
 }

@@ -5,38 +5,35 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 
+// Use require to import local images from assets/developers
 const developers = [
   {
     id: 1,
     name: "Catherine Arnado",
     role: "Full Stack Developer/Leader",
     email: "catherine.arnado@hcdc.edu.ph",
-    avatar:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
+    avatar: require("../assets/developers/kat.png"),
   },
   {
     id: 2,
     name: "Xander Jyle Palma",
     role: "Backend Operator",
     email: "xanderjyle.palma@hcdc.edu.ph",
-    avatar:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjYzJhMzAwIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+U0Q8L3RleHQ+Cjwvc3ZnPgo=",
+    avatar: require("../assets/developers/xander.png"),
   },
   {
     id: 3,
     name: "Kiesha Jimenez",
     role: "Wireframe Designer",
     email: "kiesha.jimenez@hcdc.edu.ph",
-    avatar:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjMDBiYjAyIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+TUI8L3RleHQ+Cjwvc3ZnPgo=",
+    avatar: require("../assets/developers/kiesha.png"),
   },
   {
     id: 4,
     name: "Luis Mario Palicte",
     role: "Figma Designer",
     email: "luis.mario.palicte@hcdc.edu.ph",
-    avatar:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjZmY0NDQ0Ii8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+TFE8L3RleHQ+Cjwvc3ZnPgo=",
+    avatar: require("../assets/developers/luis.png"),
   },
 ]
 
@@ -63,7 +60,7 @@ export default function DevelopersScreen() {
         <View style={styles.teamGrid}>
           {developers.map((developer) => (
             <View key={developer.id} style={styles.developerCard}>
-              <Image source={{ uri: developer.avatar }} style={styles.avatar} />
+              <Image source={developer.avatar} style={styles.avatar} />
               <View style={styles.developerInfo}>
                 <Text style={styles.developerName}>{developer.name}</Text>
                 <Text style={styles.developerRole}>{developer.role}</Text>
@@ -284,3 +281,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 })
+

@@ -1,4 +1,4 @@
-"use client"
+PROFILE:"use client"
 
 import { useState } from "react"
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Image } from "react-native"
@@ -11,6 +11,8 @@ import { useAuth } from "../../hooks/useAuth"
 import { updateProfile } from "firebase/auth"
 import { doc, updateDoc } from "firebase/firestore"
 import { db } from "../../config/firebase"
+import { useFocusEffect } from "expo-router";
+import { useCallback } from "react";
 
 const menuItems = [
   {
@@ -53,18 +55,35 @@ const menuItems = [
 
 export default function ProfileScreen() {
   const { user, isAdmin } = useAuth()
-  
   const [userProfile, setUserProfile] = useState({
     name: user?.fullName || auth.currentUser?.displayName || "John Doe",
     email: user?.email || auth.currentUser?.email || "john.doe@example.com",
     phone: user?.phone || "+63 912 345 6789",
-    avatar: user?.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
-    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
-      month: 'long', 
-      year: 'numeric' 
+    avatar: user?.avatar || auth.currentUser?.photoURL || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
+    memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+      month: 'long',
+      year: 'numeric'
     }) : "January 2024",
     totalRentals: 12,
   })
+
+  // Update the useFocusEffect to properly sync the avatar
+  useFocusEffect(
+    useCallback(() => {
+      setUserProfile(prev => ({
+        ...prev,
+        name: user?.fullName || auth.currentUser?.displayName || "John Doe",
+        email: user?.email || auth.currentUser?.email || "john.doe@example.com",
+        phone: user?.phone || "+63 912 345 6789",
+        avatar: user?.avatar || auth.currentUser?.photoURL || prev.avatar,
+        memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
+          month: 'long',
+          year: 'numeric'
+        }) : "January 2024",
+        totalRentals: 12,
+      }))
+    }, [user])
+  )
 
   const [logoutModalVisible, setLogoutModalVisible] = useState(false)
 
@@ -112,13 +131,13 @@ export default function ProfileScreen() {
         {/* User Info Card - removed avatar */}
         <View style={styles.userCard}>
           <View style={styles.userCardContent}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.avatarContainer}
               onPress={() => router.push("/profile/personal-info")}
             >
-              <Image 
-                source={{ uri: userProfile.avatar }} 
-                style={styles.avatar} 
+              <Image
+                source={{ uri: userProfile.avatar }}
+                style={styles.avatar}
               />
               <View style={styles.editAvatarButton}>
                 <Ionicons name="camera" size={14} color="#FFB700" />
@@ -140,8 +159,8 @@ export default function ProfileScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionContainer}>
-          <TouchableOpacity 
-            style={styles.logoutButton} 
+          <TouchableOpacity
+            style={styles.logoutButton}
             onPress={handleLogout}
             activeOpacity={0.7}
           >
@@ -150,6 +169,9 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
         </View>
+
+        {/* Add bottom spacer */}
+        <View style={styles.bottomSpacer} />
       </ScrollView>
 
       {/* Logout Confirmation Modal */}
@@ -164,14 +186,14 @@ export default function ProfileScreen() {
             <Text style={styles.modalTitle}>Logout</Text>
             <Text style={styles.modalMessage}>Are you sure to log out?</Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.cancelButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setLogoutModalVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalButton, styles.confirmButton]} 
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
                 onPress={confirmLogout}
               >
                 <Text style={styles.confirmButtonText}>OK</Text>
@@ -445,4 +467,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     marginHorizontal: 16,
   },
+  bottomSpacer: {
+    height: 150, // Adjust this value based on your tab bar height
+  },
 })
+

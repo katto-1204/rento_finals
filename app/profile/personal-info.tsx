@@ -12,7 +12,7 @@ import { db, auth } from "../../config/firebase"
 import { useAuth } from "../../hooks/useAuth"
 
 export default function PersonalInfoScreen() {
-  const { user } = useAuth()
+  const { user, refresh } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [userInfo, setUserInfo] = useState({
     fullName: user?.fullName || auth.currentUser?.displayName || "John Doe",
@@ -61,23 +61,26 @@ export default function PersonalInfoScreen() {
       }
 
       const userRef = doc(db, "users", auth.currentUser.uid);
-      
-      // Update Firestore with all user info including the base64 avatar
+
+      // First update Firestore
       await updateDoc(userRef, {
         fullName: userInfo.fullName,
         phone: userInfo.phone,
         dateOfBirth: userInfo.dateOfBirth,
         address: userInfo.address,
         emergencyContact: userInfo.emergencyContact,
-        avatar: userInfo.avatar, // Save base64 image
+        avatar: userInfo.avatar,
         updatedAt: new Date().toISOString()
       });
 
-      // Update Auth Profile
+      // Then update Firebase Auth profile
       await updateProfile(auth.currentUser, {
         displayName: userInfo.fullName,
         photoURL: userInfo.avatar
       });
+
+      // Force refresh user data
+      await refresh();
 
       Alert.alert("Success", "Profile updated successfully!");
       setIsEditing(false);
@@ -103,14 +106,14 @@ export default function PersonalInfoScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={isEditing ? pickImage : undefined}
             style={styles.avatarContainer}
           >
-            <Image 
-              source={{ 
-                uri: userInfo.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=" 
-              }} 
+            <Image
+              source={{
+                uri: userInfo.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo="
+              }}
               style={styles.avatar}
             />
             {isEditing && (
@@ -323,3 +326,4 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 })
+
