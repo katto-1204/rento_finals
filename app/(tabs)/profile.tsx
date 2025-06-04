@@ -1,13 +1,16 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal } from "react-native"
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, Image } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import { signOut } from "firebase/auth"
 import { auth } from "../../config/firebase"
 import { useAuth } from "../../hooks/useAuth"
+import { updateProfile } from "firebase/auth"
+import { doc, updateDoc } from "firebase/firestore"
+import { db } from "../../config/firebase"
 
 const menuItems = [
   {
@@ -51,10 +54,11 @@ const menuItems = [
 export default function ProfileScreen() {
   const { user, isAdmin } = useAuth()
   
-  const [userProfile] = useState({
+  const [userProfile, setUserProfile] = useState({
     name: user?.fullName || auth.currentUser?.displayName || "John Doe",
     email: user?.email || auth.currentUser?.email || "john.doe@example.com",
     phone: user?.phone || "+63 912 345 6789",
+    avatar: user?.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
     memberSince: user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', { 
       month: 'long', 
       year: 'numeric' 
@@ -107,25 +111,23 @@ export default function ProfileScreen() {
 
         {/* User Info Card - removed avatar */}
         <View style={styles.userCard}>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>{userProfile.name}</Text>
-            <Text style={styles.userEmail}>{userProfile.email}</Text>
-            <Text style={styles.userPhone}>{userProfile.phone}</Text>
-            {isAdmin && (
-              <View style={styles.adminBadge}>
-                <Text style={styles.adminBadgeText}>Administrator</Text>
+          <View style={styles.userCardContent}>
+            <TouchableOpacity 
+              style={styles.avatarContainer}
+              onPress={() => router.push("/profile/personal-info")}
+            >
+              <Image 
+                source={{ uri: userProfile.avatar }} 
+                style={styles.avatar} 
+              />
+              <View style={styles.editAvatarButton}>
+                <Ionicons name="camera" size={14} color="#FFB700" />
               </View>
-            )}
-            <View style={styles.userStats}>
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>{userProfile.totalRentals}</Text>
-                <Text style={styles.statLabel}>Total Rentals</Text>
-              </View>
-              <View style={styles.statDivider} />
-              <View style={styles.statItem}>
-                <Text style={styles.statValue}>Member Since</Text>
-                <Text style={styles.statLabel}>{userProfile.memberSince}</Text>
-              </View>
+            </TouchableOpacity>
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>{userProfile.name}</Text>
+              <Text style={styles.userEmail}>{userProfile.email}</Text>
+              <Text style={styles.userPhone}>{userProfile.phone}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.editButton}>
@@ -224,6 +226,34 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 1,
     borderColor: "#FFB700",
+  },
+  userCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  avatarContainer: {
+    position: 'relative',
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: "#FFB700",
+  },
+  editAvatarButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: 'rgba(255, 183, 0, 0.2)',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FFB700',
   },
   userInfo: {
     alignItems: "center",

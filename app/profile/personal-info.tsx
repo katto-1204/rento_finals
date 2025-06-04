@@ -6,39 +6,85 @@ import { SafeAreaView } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { router } from "expo-router"
 import * as ImagePicker from "expo-image-picker"
+import { doc, updateDoc } from "firebase/firestore"
+import { updateProfile } from "firebase/auth" // Add this import
+import { db, auth } from "../../config/firebase"
+import { useAuth } from "../../hooks/useAuth"
 
 export default function PersonalInfoScreen() {
+  const { user } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
   const [userInfo, setUserInfo] = useState({
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+63 912 345 6789",
-    dateOfBirth: "January 15, 1990",
-    address: "123 Main Street, Davao City",
-    emergencyContact: "+63 912 345 6788",
-    avatar:
-      "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
+    fullName: user?.fullName || auth.currentUser?.displayName || "John Doe",
+    email: user?.email || auth.currentUser?.email || "john.doe@example.com",
+    phone: user?.phone || "+63 912 345 6789",
+    dateOfBirth: user?.dateOfBirth || "January 15, 1990",
+    address: user?.address || "123 Main Street, Davao City",
+    emergencyContact: user?.emergencyContact || "+63 912 345 6788",
+    avatar: user?.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=",
   })
 
-  const handleSave = () => {
-    Alert.alert("Success", "Personal information updated successfully!")
-    setIsEditing(false)
+  const pickImage = async () => {
+    try {
+      // Request permission first
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Please grant permission to access your photos');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+        base64: true, // Enable base64 encoding
+      });
+
+      if (!result.canceled && result.assets[0].base64) {
+        const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+        setUserInfo(prev => ({
+          ...prev,
+          avatar: base64Image
+        }));
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
   }
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-      base64: true,
-    })
+  const handleSave = async () => {
+    try {
+      if (!auth.currentUser?.uid) {
+        throw new Error('No user ID found');
+      }
 
-    if (!result.canceled && result.assets[0].base64) {
-      setUserInfo({
-        ...userInfo,
-        avatar: `data:image/jpeg;base64,${result.assets[0].base64}`,
-      })
+      const userRef = doc(db, "users", auth.currentUser.uid);
+      
+      // Update Firestore with all user info including the base64 avatar
+      await updateDoc(userRef, {
+        fullName: userInfo.fullName,
+        phone: userInfo.phone,
+        dateOfBirth: userInfo.dateOfBirth,
+        address: userInfo.address,
+        emergencyContact: userInfo.emergencyContact,
+        avatar: userInfo.avatar, // Save base64 image
+        updatedAt: new Date().toISOString()
+      });
+
+      // Update Auth Profile
+      await updateProfile(auth.currentUser, {
+        displayName: userInfo.fullName,
+        photoURL: userInfo.avatar
+      });
+
+      Alert.alert("Success", "Profile updated successfully!");
+      setIsEditing(false);
+      router.back();
+    } catch (error) {
+      console.error('Save error:', error);
+      Alert.alert('Error', 'Failed to save changes');
     }
   }
 
@@ -57,8 +103,16 @@ export default function PersonalInfoScreen() {
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Avatar Section */}
         <View style={styles.avatarSection}>
-          <TouchableOpacity onPress={pickImage} disabled={!isEditing}>
-            <Image source={{ uri: userInfo.avatar }} style={styles.avatar} />
+          <TouchableOpacity 
+            onPress={isEditing ? pickImage : undefined}
+            style={styles.avatarContainer}
+          >
+            <Image 
+              source={{ 
+                uri: userInfo.avatar || "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjUwIiBjeT0iNTAiIHI9IjUwIiBmaWxsPSIjNDE2OWUxIi8+Cjx0ZXh0IHg9IjUwIiB5PSI1NSIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIiBmb250LWZhbWlseT0ic3lzdGVtLXVpIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCI+SkQ8L3RleHQ+Cjwvc3ZnPgo=" 
+              }} 
+              style={styles.avatar}
+            />
             {isEditing && (
               <View style={styles.cameraIcon}>
                 <Ionicons name="camera" size={20} color="#ffffff" />
@@ -177,28 +231,36 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
+  avatarContainer: {
+    position: 'relative',
+    width: 120,
+    height: 120,
+    marginBottom: 12,
+  },
   avatar: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 12,
+    borderWidth: 3,
+    borderColor: "#FFB700",
   },
   cameraIcon: {
     position: "absolute",
-    bottom: 12,
+    bottom: 0,
     right: 0,
-    backgroundColor: "#4169e1",
+    backgroundColor: "rgba(255, 183, 0, 0.2)",
     borderRadius: 20,
     width: 40,
     height: 40,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "#ffffff",
+    borderWidth: 2,
+    borderColor: "#FFB700",
   },
   avatarText: {
     fontSize: 16,
-    color: "#666666",
+    color: "#ffffff",
+    opacity: 0.8,
   },
   form: {
     padding: 20,
